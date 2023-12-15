@@ -1,3 +1,4 @@
+import 'package:etebase_flutter/etebase_flutter.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -15,14 +16,28 @@ class MainApp extends StatelessWidget {
               child: TextButton.icon(
                 icon: const Icon(Icons.abc),
                 label: const Text('Hello World!'),
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Center(child: Text('Button pressed')),
-                  ),
-                ),
+                onPressed: () async => _etebaseInit(context),
               ),
             ),
           ),
         ),
       );
+
+  Future<void> _etebaseInit(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    final client = await EtebaseClient.create(
+      'wear_tasks',
+      Uri.https('etebase.skycoder42.de'),
+    );
+    final serverOk = await client.checkEtebaseServer();
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Center(
+          child: Text('Server: $serverOk'),
+        ),
+      ),
+    );
+  }
 }
