@@ -29,5 +29,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+		<meta-data
+			android:name="com.google.android.wearable.standalone"
+			android:value="true" />
     </application>
+
+	<uses-feature android:name="android.hardware.type.watch" />
 </manifest>
