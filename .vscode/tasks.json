@@ -14,6 +14,25 @@
 			"problemMatcher": [],
 			"label": "dart: install pre commit hooks",
 			"detail": ""
+		},
+		{
+			"type": "flutter",
+			"command": "flutter",
+			"args": [
+				"pub",
+				"run",
+				"build_runner",
+				"watch"
+			],
+			"problemMatcher": [
+				"$dart-build_runner"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"label": "flutter: flutter pub run build_runner watch",
+			"detail": ""
 		}
 	]
 }
