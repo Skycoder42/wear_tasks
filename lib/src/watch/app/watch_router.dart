@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../pages/login_page.dart';
-import '../widgets/watch_scaffold.dart';
 
 part 'watch_router.g.dart';
 
@@ -28,7 +27,7 @@ class HomeRoute extends GoRouteData {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      const WatchScaffold(body: Placeholder());
+      const Scaffold(body: Placeholder());
 }
 
 @TypedGoRoute<LoginRoute>(path: '/login')

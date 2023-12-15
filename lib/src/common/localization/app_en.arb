@@ -1,3 +1,7 @@
 {
-  "app_name": "Wear-Tasks"
+  "app_name": "Wear-Tasks",
+  "login_page_title": "Login",
+  "login_page_username_label": "Username",
+  "login_page_password_label": "Password",
+  "login_page_server_url_label": "Server-URL"
 }

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../widgets/watch_scaffold.dart';
+import '../../common/localization/localization.dart';
 
 class LoginPage extends HookConsumerWidget {
   final String? redirectTo;
@@ -13,17 +13,49 @@ class LoginPage extends HookConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => ColoredBox(
-        color: Colors.red,
-        child: WatchScaffold(
-          body: SafeArea(
-            child: ColoredBox(
-              color: Colors.green,
-              child: Center(
-                child: Text('Redirect to: $redirectTo'),
+  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              title: Text(context.strings.login_page_title),
+              pinned: true,
+            ),
+            SliverToBoxAdapter(
+              child: SafeArea(
+                top: false,
+                child: Form(
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        decoration: InputDecoration(
+                          alignLabelWithHint: true,
+                          label:
+                              Text(context.strings.login_page_username_label),
+                        ),
+                      ),
+                      TextFormField(
+                        decoration: InputDecoration(
+                          alignLabelWithHint: true,
+                          label:
+                              Text(context.strings.login_page_password_label),
+                        ),
+                        obscureText: true,
+                      ),
+                      TextFormField(
+                        decoration: InputDecoration(
+                          alignLabelWithHint: true,
+                          label: Text(
+                            context.strings.login_page_server_url_label,
+                          ),
+                        ),
+                        keyboardType: TextInputType.url,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
       );
 

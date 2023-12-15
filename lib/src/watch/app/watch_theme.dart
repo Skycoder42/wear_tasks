@@ -7,6 +7,7 @@ abstract base class WatchTheme {
     colorScheme: ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.dark,
+      background: Colors.black,
     ),
   );
 }
