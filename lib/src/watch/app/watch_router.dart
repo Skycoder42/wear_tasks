@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../pages/login_page.dart';
+import '../pages/login/login_page.dart';
 
 part 'watch_router.g.dart';
 

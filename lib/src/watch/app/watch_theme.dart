@@ -11,3 +11,7 @@ abstract base class WatchTheme {
     ),
   );
 }
+
+extension BuildContextX on BuildContext {
+  ThemeData get theme => Theme.of(this);
+}
