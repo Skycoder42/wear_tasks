@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../common/localization/localization.dart';
-import '../../app/watch_theme.dart';
 import '../../providers/etebase_provider.dart';
 import '../../widgets/checkbox_form_field.dart';
 
@@ -25,6 +26,7 @@ class LoginPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useState(GlobalKey<FormState>());
+    final isValid = useState(false);
     final useDefaultServer = useState(true);
     final defaultServerUrlController = useTextEditingController();
     final customServerUrlController = useTextEditingController();
@@ -53,6 +55,10 @@ class LoginPage extends HookConsumerWidget {
               top: false,
               child: Form(
                 key: formKey.value,
+                onChanged: () => scheduleMicrotask(() {
+                  isValid.value =
+                      formKey.value.currentState?.validate() ?? false;
+                }),
                 child: Column(
                   children: [
                     TextFormField(
@@ -96,8 +102,13 @@ class LoginPage extends HookConsumerWidget {
                           resultRef.value.serverUrl = Uri.parse(newValue!),
                     ),
                     ElevatedButton(
-                      onPressed: () =>
-                          _submit(context, formKey.value.currentState!),
+                      onPressed: isValid.value
+                          ? () => _submit(
+                                context,
+                                formKey.value.currentState!,
+                                isValid,
+                              )
+                          : null,
                       child: Text(context.strings.login_page_login_button),
                     ),
                   ],
@@ -132,9 +143,22 @@ class LoginPage extends HookConsumerWidget {
 
     return useCallback(
       // ignore: avoid_types_on_closure_parameters
-      (String? serverUrl) => useDefaultServer.value && serverUrlData.hasError
-          ? serverUrlData.error.toString()
-          : _validateNotEmpty(context, serverUrl),
+      (String? serverUrl) {
+        if (useDefaultServer.value && serverUrlData.hasError) {
+          return serverUrlData.error.toString();
+        }
+
+        if (_validateNotEmpty(context, serverUrl) case final String error) {
+          return error;
+        }
+
+        final url = Uri.tryParse(serverUrl!);
+        if (url == null || !url.isAbsolute || !url.isScheme('https')) {
+          return context.strings.login_page_validator_https_url;
+        }
+
+        return null;
+      },
       [context, useDefaultServer.value, serverUrlData],
     );
   }
@@ -144,18 +168,13 @@ class LoginPage extends HookConsumerWidget {
           ? context.strings.login_page_validator_not_empty
           : null;
 
-  void _submit(BuildContext context, FormState form) {
-    final sm = ScaffoldMessenger.of(context);
+  void _submit(
+    BuildContext context,
+    FormState form,
+    ValueNotifier<bool> isValid,
+  ) {
     if (!form.validate()) {
-      sm.showSnackBar(
-        SnackBar(
-          backgroundColor: context.theme.colorScheme.error,
-          content: Text(
-            'TODO',
-            style: TextStyle(color: context.theme.colorScheme.onError),
-          ),
-        ),
-      );
+      isValid.value = false;
       return;
     }
 

@@ -6,5 +6,6 @@
   "login_page_use_default_url_label": "Use Default Server-URL",
   "login_page_server_url_label": "Server-URL",
   "login_page_validator_not_empty": "Must not be empty",
+  "login_page_validator_https_url": "Must be a valid HTTPS url",
   "login_page_login_button": "Login"
 }
