@@ -6,6 +6,7 @@ class CheckboxFormField extends FormField<bool> {
   CheckboxFormField({
     super.key,
     Widget? title,
+    Widget? subtitle,
     void Function(bool?)? onChanged,
     super.onSaved,
     super.validator,
@@ -15,7 +16,7 @@ class CheckboxFormField extends FormField<bool> {
     super.restorationId,
   }) : super(
           builder: (state) => CheckboxListTile(
-            dense: state.hasError,
+            dense: state.hasError || subtitle != null,
             title: title,
             value: state.value,
             onChanged: (v) {
@@ -30,7 +31,7 @@ class CheckboxFormField extends FormField<bool> {
                       style: TextStyle(color: context.theme.colorScheme.error),
                     ),
                   )
-                : null,
+                : subtitle,
             controlAffinity: ListTileControlAffinity.leading,
             enabled: enabled,
           ),

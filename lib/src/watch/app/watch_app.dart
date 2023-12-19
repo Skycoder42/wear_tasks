@@ -34,7 +34,11 @@ class WatchApp extends ConsumerWidget {
           final padding = (diameter - ((diameter / 2) * sqrt2)) / 2;
           return MediaQuery(
             data: mediaQuery.copyWith(
-              padding: EdgeInsets.all(padding),
+              padding: mediaQuery.padding +
+                  EdgeInsets.only(
+                    top: padding,
+                    bottom: padding,
+                  ),
             ),
             child: child ?? const SizedBox.shrink(),
           );

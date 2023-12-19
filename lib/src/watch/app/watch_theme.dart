@@ -9,9 +9,20 @@ abstract base class WatchTheme {
       brightness: Brightness.dark,
       background: Colors.black,
     ),
+  ).apply(
+    (t) => t.copyWith(
+      listTileTheme: const ListTileThemeData(
+        contentPadding: EdgeInsets.zero,
+        visualDensity: VisualDensity.compact,
+      ),
+    ),
   );
 }
 
 extension BuildContextX on BuildContext {
   ThemeData get theme => Theme.of(this);
+}
+
+extension on ThemeData {
+  ThemeData apply(ThemeData Function(ThemeData t) callback) => callback(this);
 }

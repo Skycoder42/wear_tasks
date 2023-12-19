@@ -1,18 +1,19 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../common/localization/localization.dart';
+import '../../app/watch_theme.dart';
 import '../../providers/etebase_provider.dart';
 import '../../widgets/checkbox_form_field.dart';
+import '../../widgets/watch_scaffold.dart';
 
 class _LoginInfo {
   String username = '';
   String password = '';
-  Uri serverUrl = Uri();
+  bool useDefaultServer = true;
+  Uri customServerUrl = Uri();
 }
 
 class LoginPage extends HookConsumerWidget {
@@ -26,155 +27,146 @@ class LoginPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useState(GlobalKey<FormState>());
-    final isValid = useState(false);
-    final useDefaultServer = useState(true);
-    final defaultServerUrlController = useTextEditingController();
     final customServerUrlController = useTextEditingController();
-    final serverUrlController = useDefaultServer.value
-        ? defaultServerUrlController
-        : customServerUrlController;
 
-    final serverUrlValidator = _useServerUrl(
-      context,
-      ref,
-      defaultServerUrlController,
+    final (
       useDefaultServer,
-    );
+      serverUrl,
+      serverUrlErrorValidator,
+    ) = _useServerUrl(context, ref);
 
     final resultRef = useRef(_LoginInfo());
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            title: Text(context.strings.login_page_title),
-            pinned: true,
-          ),
-          SliverToBoxAdapter(
-            child: SafeArea(
-              top: false,
-              child: Form(
-                key: formKey.value,
-                onChanged: () => scheduleMicrotask(() {
-                  isValid.value =
-                      formKey.value.currentState?.validate() ?? false;
-                }),
-                child: Column(
-                  children: [
-                    TextFormField(
-                      decoration: InputDecoration(
-                        alignLabelWithHint: true,
-                        label: Text(context.strings.login_page_username_label),
-                      ),
-                      validator: (value) => _validateNotEmpty(context, value),
-                      onSaved: (newValue) =>
-                          resultRef.value.username = newValue!,
-                    ),
-                    TextFormField(
-                      decoration: InputDecoration(
-                        alignLabelWithHint: true,
-                        label: Text(context.strings.login_page_password_label),
-                      ),
-                      obscureText: true,
-                      validator: (value) => _validateNotEmpty(context, value),
-                      onSaved: (newValue) =>
-                          resultRef.value.password = newValue!,
-                    ),
-                    CheckboxFormField(
-                      title: Text(
-                        context.strings.login_page_use_default_url_label,
-                      ),
-                      initialValue: useDefaultServer.value,
-                      onChanged: (v) => useDefaultServer.value = v ?? true,
-                    ),
-                    TextFormField(
-                      controller: serverUrlController,
-                      decoration: InputDecoration(
-                        alignLabelWithHint: true,
-                        label: Text(
-                          context.strings.login_page_server_url_label,
-                        ),
-                      ),
-                      keyboardType: TextInputType.url,
-                      readOnly: useDefaultServer.value,
-                      validator: serverUrlValidator,
-                      onSaved: (newValue) =>
-                          resultRef.value.serverUrl = Uri.parse(newValue!),
-                    ),
-                    ElevatedButton(
-                      onPressed: isValid.value
-                          ? () => _submit(
-                                context,
-                                formKey.value.currentState!,
-                                isValid,
-                              )
-                          : null,
-                      child: Text(context.strings.login_page_login_button),
-                    ),
-                  ],
+    return WatchScaffold(
+      title: Text(context.strings.login_page_title),
+      body: SafeArea(
+        top: false,
+        left: false,
+        right: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Form(
+            key: formKey.value,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              children: [
+                TextFormField(
+                  decoration: InputDecoration(
+                    alignLabelWithHint: true,
+                    label: Text(context.strings.login_page_username_label),
+                  ),
+                  validator: (value) => _validateNotNullOrEmpty(context, value),
+                  onSaved: (newValue) => resultRef.value.username = newValue!,
                 ),
-              ),
+                TextFormField(
+                  decoration: InputDecoration(
+                    alignLabelWithHint: true,
+                    label: Text(context.strings.login_page_password_label),
+                  ),
+                  obscureText: true,
+                  autocorrect: false,
+                  enableIMEPersonalizedLearning: false,
+                  enableSuggestions: false,
+                  spellCheckConfiguration:
+                      const SpellCheckConfiguration.disabled(),
+                  validator: (value) => _validateNotNullOrEmpty(context, value),
+                  onSaved: (newValue) => resultRef.value.password = newValue!,
+                ),
+                const SizedBox(height: 8),
+                CheckboxFormField(
+                  title: Text(
+                    context.strings.login_page_use_default_url_label,
+                  ),
+                  subtitle: serverUrl != null ? Text(serverUrl) : null,
+                  initialValue: useDefaultServer.value,
+                  onChanged: (v) => useDefaultServer.value = v ?? true,
+                  validator: serverUrlErrorValidator,
+                  onSaved: (newValue) =>
+                      resultRef.value.useDefaultServer = newValue ?? true,
+                ),
+                if (!useDefaultServer.value)
+                  TextFormField(
+                    controller: customServerUrlController,
+                    decoration: InputDecoration(
+                      alignLabelWithHint: true,
+                      label: Text(
+                        context.strings.login_page_server_url_label,
+                      ),
+                    ),
+                    keyboardType: TextInputType.url,
+                    readOnly: useDefaultServer.value,
+                    validator: (v) => _validateHttpUrl(context, v),
+                    onSaved: (newValue) =>
+                        resultRef.value.customServerUrl = Uri.parse(newValue!),
+                  ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => _submit(
+                    context,
+                    formKey.value.currentState!,
+                  ),
+                  child: Text(context.strings.login_page_login_button),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  String? Function(String?) _useServerUrl(
+  (
+    ValueNotifier<bool>,
+    String?,
+    String? Function(bool?),
+  ) _useServerUrl(
     BuildContext context,
     WidgetRef ref,
-    TextEditingController defaultServerUrlController,
-    ValueNotifier<bool> useDefaultServer,
   ) {
+    final useDefaultServer = useState(true);
     final serverUrlData = ref.watch(etebaseDefaultServerUrlProvider);
-
-    useEffect(
-      () {
-        final serverUrl = serverUrlData.value;
-        if (serverUrl != null) {
-          defaultServerUrlController.text = serverUrlData.value.toString();
-        }
-
-        return null;
-      },
-      [serverUrlData.value],
-    );
-
-    return useCallback(
-      // ignore: avoid_types_on_closure_parameters
-      (String? serverUrl) {
-        if (useDefaultServer.value && serverUrlData.hasError) {
-          return serverUrlData.error.toString();
-        }
-
-        if (_validateNotEmpty(context, serverUrl) case final String error) {
-          return error;
-        }
-
-        final url = Uri.tryParse(serverUrl!);
-        if (url == null || !url.isAbsolute || !url.isScheme('https')) {
-          return context.strings.login_page_validator_https_url;
-        }
-
-        return null;
-      },
-      [context, useDefaultServer.value, serverUrlData],
-    );
+    switch (serverUrlData) {
+      case AsyncData(value: final serverUrl):
+        return (useDefaultServer, serverUrl.toString(), (_) => null);
+      case AsyncError(error: final error):
+        return (useDefaultServer, null, (_) => error.toString());
+      default:
+        return (useDefaultServer, null, (_) => null);
+    }
   }
 
-  String? _validateNotEmpty(BuildContext context, String? value) =>
+  String? _validateNotNullOrEmpty(BuildContext context, String? value) =>
       (value?.isEmpty ?? true)
           ? context.strings.login_page_validator_not_empty
           : null;
 
+  String? _validateHttpUrl(BuildContext context, String? value) {
+    if (_validateNotNullOrEmpty(context, value) case final String error) {
+      return error;
+    }
+
+    final url = Uri.tryParse(value!);
+    if (url == null || !url.isAbsolute || !url.isScheme('https')) {
+      return context.strings.login_page_validator_https_url;
+    }
+
+    return null;
+  }
+
   void _submit(
     BuildContext context,
     FormState form,
-    ValueNotifier<bool> isValid,
   ) {
     if (!form.validate()) {
-      isValid.value = false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: context.theme.colorScheme.error,
+          content: Text(
+            context.strings.login_page_invalid,
+            style: TextStyle(color: context.theme.colorScheme.onError),
+          ),
+        ),
+      );
       return;
     }
 
