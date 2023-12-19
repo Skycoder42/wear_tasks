@@ -6,7 +6,7 @@ import '../../common/providers/secure_storage.dart';
 part 'settings_service.g.dart';
 
 // coverage:ignore-start
-@riverpod
+@Riverpod(keepAlive: true)
 Future<SettingsService> settingsService(SettingsServiceRef ref) async =>
     SettingsService(
       await ref.watch(secureStorageProvider.future),
@@ -15,6 +15,7 @@ Future<SettingsService> settingsService(SettingsServiceRef ref) async =>
 
 class SettingsService {
   static const _etebaseAccountDataKey = 'etebase.accountData';
+  static const _etebaseServerUrlKey = 'etebase.serverUrl';
 
   final FlutterSecureStorage _secureStorage;
 
@@ -26,6 +27,19 @@ class SettingsService {
   Future<void> setEtebaseAccountData(String accountData) =>
       _secureStorage.write(key: _etebaseAccountDataKey, value: accountData);
 
-  Future<void> removeEtebaseAccountData(String accountData) =>
+  Future<void> removeEtebaseAccountData() =>
+      _secureStorage.delete(key: _etebaseAccountDataKey);
+
+  Future<Uri?> getEtebaseServerUrl() async {
+    final rawUri = await _secureStorage.read(key: _etebaseServerUrlKey);
+    return rawUri != null ? Uri.parse(rawUri) : null;
+  }
+
+  Future<void> setEtebaseServerUrl(Uri serverUrl) => _secureStorage.write(
+        key: _etebaseServerUrlKey,
+        value: serverUrl.toString(),
+      );
+
+  Future<void> removeEtebaseServerUrl() =>
       _secureStorage.delete(key: _etebaseAccountDataKey);
 }
