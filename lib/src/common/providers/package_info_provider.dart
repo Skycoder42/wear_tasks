@@ -3,6 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'package_info_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<PackageInfo> packageInfo(PackageInfoRef ref) =>
     PackageInfo.fromPlatform();

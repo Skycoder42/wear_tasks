@@ -9,11 +9,13 @@ part 'etebase_provider.g.dart';
 Future<Uri> etebaseDefaultServerUrl(EtebaseDefaultServerUrlRef ref) =>
     etebaseGetDefaultServerUrl();
 
-@riverpod
-Future<EtebaseClient> etebaseClient(EtebaseClientRef ref, Uri serverUrl) async {
+@Riverpod(keepAlive: true)
+Future<EtebaseClient> etebaseClient(
+  EtebaseClientRef ref,
+  Uri? serverUrl,
+) async {
   final packageInfo = await ref.watch(packageInfoProvider.future);
-  return EtebaseClient.create(
-    packageInfo.packageName,
-    serverUrl,
-  );
+  final client = await EtebaseClient.create(packageInfo.packageName, serverUrl);
+  ref.onDispose(client.dispose);
+  return client;
 }
