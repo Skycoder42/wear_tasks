@@ -32,17 +32,22 @@ class AccountService extends _$AccountService {
 
   @override
   Future<EtebaseAccount?> build() async {
+    _logger.finer('Restoring account');
     final settings = await ref.watch(settingsServiceProvider.future);
     final accountData = await settings.getEtebaseAccountData();
     if (accountData == null) {
+      _logger.fine('No account data in secure store');
       return null;
     }
 
     final serverUrl = await settings.getEtebaseServerUrl();
+    _logger.finer('Creating client for server: $serverUrl');
     final client = await ref.watch(etebaseClientProvider(serverUrl).future);
+    _logger.finer('Restoring account from persisted data');
     final account = await EtebaseAccount.restore(client, accountData);
     ref.onDispose(account.dispose);
 
+    _logger.info('Successfully restored account!');
     return account;
   }
 

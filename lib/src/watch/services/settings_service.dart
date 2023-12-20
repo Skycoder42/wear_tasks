@@ -7,13 +7,21 @@ part 'settings_service.g.dart';
 
 // coverage:ignore-start
 @Riverpod(keepAlive: true)
-Future<SettingsService> settingsService(SettingsServiceRef ref) async =>
-    SettingsService(
-      await ref.watch(secureStorageProvider.future),
-    );
+Future<SettingsService> settingsService(SettingsServiceRef ref) async {
+  final service = SettingsService(
+    await ref.watch(secureStorageProvider.future),
+  );
+  if (!await service._secureStorage
+      .containsKey(key: SettingsService._initKey)) {
+    await service._secureStorage
+        .write(key: SettingsService._initKey, value: '');
+  }
+  return service;
+}
 // coverage:ignore-end
 
 class SettingsService {
+  static const _initKey = '__init';
   static const _etebaseAccountDataKey = 'etebase.accountData';
   static const _etebaseServerUrlKey = 'etebase.serverUrl';
 
