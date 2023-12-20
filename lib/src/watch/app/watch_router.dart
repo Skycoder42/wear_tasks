@@ -26,8 +26,14 @@ class GlobalResolver {
       return null;
     }
 
-    final account = await _ref.read(accountServiceProvider.future);
-    if (account == null) {
+    try {
+      final account = await _ref.read(accountServiceProvider.future);
+      if (account == null) {
+        return LoginRoute(redirectTo: state.fullPath).location;
+      }
+      // ignore: avoid_catches_without_on_clauses
+    } catch (e) {
+      // TODO logging? snackback?
       return LoginRoute(redirectTo: state.fullPath).location;
     }
 
