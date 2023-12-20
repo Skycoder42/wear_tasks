@@ -3,17 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../pages/home/home_page.dart';
-import '../pages/login/login_page.dart';
-import '../services/account_service.dart';
+import '../../services/account_service.dart';
+import 'watch_router.dart';
 
-part 'watch_router.g.dart';
-
-@riverpod
-GoRouter watchRouter(WatchRouterRef ref) => GoRouter(
-      routes: $appRoutes,
-      redirect: ref.watch(globalResolverProvider).call,
-    );
+part 'global_resolver.g.dart';
 
 @riverpod
 GlobalResolver globalResolver(GlobalResolverRef ref) => GlobalResolver(ref);
@@ -48,28 +41,4 @@ class GlobalResolver {
     _logger.finer('${state.fullPath}: redirecting to login page');
     return LoginRoute(redirectTo: state.fullPath).location;
   }
-}
-
-@TypedGoRoute<HomeRoute>(path: '/')
-@immutable
-class HomeRoute extends GoRouteData {
-  const HomeRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => const HomePage();
-}
-
-@TypedGoRoute<LoginRoute>(path: '/login')
-@immutable
-class LoginRoute extends GoRouteData {
-  final String? redirectTo;
-
-  const LoginRoute({
-    this.redirectTo,
-  });
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => LoginPage(
-        redirectTo: redirectTo,
-      );
 }

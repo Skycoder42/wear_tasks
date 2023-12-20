@@ -5,7 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../common/localization/localization.dart';
-import 'watch_router.dart';
+import 'router/watch_router.dart';
 import 'watch_theme.dart';
 
 class WatchApp extends ConsumerWidget {
