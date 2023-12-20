@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 abstract base class WatchTheme {
-  static const seedColor = Colors.purple;
+  static const seedColor = Color(0xFF673ab7);
 
   static final theme = ThemeData.from(
     colorScheme: ColorScheme.fromSeed(
