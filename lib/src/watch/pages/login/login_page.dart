@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -8,15 +10,9 @@ import '../../../common/providers/etebase_provider.dart';
 import '../../../common/widgets/error_snack_bar.dart';
 import '../../../common/widgets/success_snack_bar.dart';
 import '../../widgets/checkbox_form_field.dart';
+import '../../widgets/submit_form.dart';
 import '../../widgets/watch_scaffold.dart';
 import 'login_controller.dart';
-
-class _LoginInfo {
-  String username = '';
-  String password = '';
-  bool useDefaultServer = true;
-  Uri customServerUrl = Uri();
-}
 
 class LoginPage extends HookConsumerWidget {
   final String? redirectTo;
@@ -28,8 +24,6 @@ class LoginPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formKey = useState(GlobalKey<FormState>()).value;
-    final formState = formKey.currentState;
     final customServerUrlController = useTextEditingController();
 
     final (
@@ -38,7 +32,6 @@ class LoginPage extends HookConsumerWidget {
       serverUrlErrorValidator,
     ) = _useServerUrl(context, ref);
 
-    final resultRef = useRef(_LoginInfo());
     final loginState = ref.watch(loginControllerProvider);
 
     ref.listen(
@@ -74,10 +67,24 @@ class LoginPage extends HookConsumerWidget {
         right: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Form(
-            key: formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: Column(
+          child: SubmitForm(
+            onValidationFailed: () =>
+                ScaffoldMessenger.of(context).showSnackBar(
+              ErrorSnackBar(
+                context: context,
+                content: Text(context.strings.login_page_invalid),
+              ),
+            ),
+            onSubmit: (result) => unawaited(
+              ref.read(loginControllerProvider.notifier).login(
+                    result['username'] as String,
+                    result['password'] as String,
+                    result['useDefaultServer'] as bool
+                        ? null
+                        : result['customServerUrl'] as Uri,
+                  ),
+            ),
+            builder: (context, onSaved, onSubmit) => Column(
               children: [
                 TextFormField(
                   enabled: loginState.canLogin,
@@ -86,7 +93,7 @@ class LoginPage extends HookConsumerWidget {
                     label: Text(context.strings.login_page_username_label),
                   ),
                   validator: (value) => _validateNotNullOrEmpty(context, value),
-                  onSaved: (newValue) => resultRef.value.username = newValue!,
+                  onSaved: (newValue) => onSaved('username', newValue),
                 ),
                 TextFormField(
                   enabled: loginState.canLogin,
@@ -101,7 +108,7 @@ class LoginPage extends HookConsumerWidget {
                   spellCheckConfiguration:
                       const SpellCheckConfiguration.disabled(),
                   validator: (value) => _validateNotNullOrEmpty(context, value),
-                  onSaved: (newValue) => resultRef.value.password = newValue!,
+                  onSaved: (newValue) => onSaved('password', newValue),
                 ),
                 const SizedBox(height: 8),
                 CheckboxFormField(
@@ -114,8 +121,7 @@ class LoginPage extends HookConsumerWidget {
                   initialValue: useDefaultServer.value,
                   onChanged: (v) => useDefaultServer.value = v ?? true,
                   validator: serverUrlErrorValidator,
-                  onSaved: (newValue) =>
-                      resultRef.value.useDefaultServer = newValue!,
+                  onSaved: (newValue) => onSaved('useDefaultServer', newValue),
                 ),
                 if (!useDefaultServer.value)
                   TextFormField(
@@ -131,13 +137,11 @@ class LoginPage extends HookConsumerWidget {
                     readOnly: useDefaultServer.value,
                     validator: (v) => _validateHttpUrl(context, v),
                     onSaved: (newValue) =>
-                        resultRef.value.customServerUrl = Uri.parse(newValue!),
+                        onSaved('customServerUrl', Uri.parse(newValue!)),
                   ),
                 const SizedBox(height: 8),
                 ElevatedButton(
-                  onPressed: formState != null && loginState.canLogin
-                      ? () async => _submit(context, ref, formState, resultRef)
-                      : null,
+                  onPressed: onSubmit,
                   child: Text(context.strings.login_page_login_button),
                 ),
               ],
@@ -188,32 +192,6 @@ class LoginPage extends HookConsumerWidget {
     }
 
     return null;
-  }
-
-  Future<void> _submit(
-    BuildContext context,
-    WidgetRef ref,
-    FormState form,
-    ObjectRef<_LoginInfo> loginInfo,
-  ) async {
-    if (!form.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        ErrorSnackBar(
-          context: context,
-          content: Text(context.strings.login_page_invalid),
-        ),
-      );
-      return;
-    }
-
-    form.save();
-
-    final result = loginInfo.value;
-    await ref.read(loginControllerProvider.notifier).login(
-          result.username,
-          result.password,
-          result.useDefaultServer ? null : result.customServerUrl,
-        );
   }
 
   @override
