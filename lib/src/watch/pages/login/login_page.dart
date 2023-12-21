@@ -7,9 +7,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../common/localization/error_localizer.dart';
 import '../../../common/localization/localization.dart';
 import '../../../common/providers/etebase_provider.dart';
-import '../../../common/utils/error_stringifier.dart';
 import '../../../common/widgets/error_snack_bar.dart';
 import '../../../common/widgets/success_snack_bar.dart';
 import '../../services/account_service.dart';
@@ -62,8 +62,7 @@ class LoginPage extends HookConsumerWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               ErrorSnackBar(
                 context: context,
-                // TODO provider for ErrorStringifier
-                content: Text(ErrorStringifier.stringify(error)),
+                content: Text(ref.read(errorLocalizerProvider).localize(error)),
               ),
             );
           default:

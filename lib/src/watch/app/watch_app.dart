@@ -1,11 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../common/localization/localization.dart';
 import 'router/watch_router.dart';
+import 'watch_provider_scope.dart';
 import 'watch_theme.dart';
 
 class WatchApp extends ConsumerWidget {
@@ -29,6 +29,8 @@ class WatchApp extends ConsumerWidget {
 
         // app configuration
         builder: (context, child) {
+          WatchProviderScope.updateLocalizations(context);
+
           final mediaQuery = MediaQuery.of(context);
           final diameter = min(mediaQuery.size.width, mediaQuery.size.height);
           final padding = (diameter - ((diameter / 2) * sqrt2)) / 2;

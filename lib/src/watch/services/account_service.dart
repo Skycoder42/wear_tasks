@@ -14,7 +14,7 @@ class NotLoggedInException implements Exception {
   NotLoggedInException([this.innerException, this.innerStackTrace]);
 
   @override
-  String toString() => 'Not logged in';
+  String toString() => 'NotLoggedInException: $innerException';
 }
 
 @riverpod
@@ -32,46 +32,53 @@ class AccountService extends _$AccountService {
 
   @override
   Future<EtebaseAccount?> build() async {
-    _logger.finer('Restoring account');
+    _logger.fine('Restoring account');
     final settings = await ref.watch(settingsServiceProvider.future);
     final accountData = await settings.getEtebaseAccountData();
     if (accountData == null) {
-      _logger.fine('No account data in secure store');
+      _logger.info('No account data in secure storage');
       return null;
     }
 
     final serverUrl = await settings.getEtebaseServerUrl();
-    _logger.finer('Creating client for server: $serverUrl');
+    _logger.fine('Creating client for server: $serverUrl');
     final client = await ref.watch(etebaseClientProvider(serverUrl).future);
-    _logger.finer('Restoring account from persisted data');
+    _logger.fine('Restoring account from persisted data');
     final account = await EtebaseAccount.restore(client, accountData);
     ref.onDispose(account.dispose);
 
-    _logger.info('Successfully restored account!');
+    _logger.info('Successfully restored account form secure storage');
     return account;
   }
 
   Future<void> login(String username, String password, [Uri? serverUrl]) async {
+    _logger.fine('Waiting for pending operations to finish');
     final oldAccount = await future.catchError((_) => null);
 
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       EtebaseAccount? account;
       try {
+        _logger.fine('Logging out of previous account, if present');
         await oldAccount?.logout();
 
+        _logger.fine('Creating client for server: $serverUrl');
         final settings = await ref.watch(settingsServiceProvider.future);
         final client = await ref.watch(etebaseClientProvider(serverUrl).future);
 
+        _logger.fine('Logging in for account $username');
         account = await EtebaseAccount.login(client, username, password);
+
+        _logger.fine('Persisting account data to secure storage');
         await settings.setEtebaseAccountData(await account.save());
 
+        _logger.info('Successfully logged in');
         ref.onDispose(account.dispose);
         return account;
 
         // ignore: avoid_catches_without_on_clauses
       } catch (error, stackTrace) {
-        _logger.severe('Etebase login failed', error, stackTrace);
+        _logger.severe('Login failed', error, stackTrace);
         await account?.dispose();
         rethrow;
       }
@@ -79,10 +86,17 @@ class AccountService extends _$AccountService {
   }
 
   Future<void> logout() async {
+    _logger.fine('Logging out of previous account, if present');
+    await future.then((account) async => account?.logout(), onError: (_) {});
+
+    _logger.fine('Deleting account data from secure storage');
     final settings = await ref.read(settingsServiceProvider.future);
     await settings.removeEtebaseAccountData();
     await settings.removeEtebaseServerUrl();
-    await state.valueOrNull?.logout();
+
+    _logger.fine('Invalidating provider');
     ref.invalidateSelf();
+
+    _logger.info('Successfully logged out');
   }
 }

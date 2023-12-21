@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../common/providers/secure_storage.dart';
@@ -11,11 +13,7 @@ Future<SettingsService> settingsService(SettingsServiceRef ref) async {
   final service = SettingsService(
     await ref.watch(secureStorageProvider.future),
   );
-  if (!await service._secureStorage
-      .containsKey(key: SettingsService._initKey)) {
-    await service._secureStorage
-        .write(key: SettingsService._initKey, value: '');
-  }
+  await service.init();
   return service;
 }
 // coverage:ignore-end
@@ -27,7 +25,18 @@ class SettingsService {
 
   final FlutterSecureStorage _secureStorage;
 
+  final _logger = Logger('$SettingsService');
+
   SettingsService(this._secureStorage);
+
+  @visibleForTesting
+  Future<void> init() async {
+    _logger.fine('Initializing secure storage');
+    if (!await _secureStorage.containsKey(key: SettingsService._initKey)) {
+      _logger.fine('Writing initializer key to ensure native code is up');
+      await _secureStorage.write(key: SettingsService._initKey, value: '');
+    }
+  }
 
   Future<String?> getEtebaseAccountData() =>
       _secureStorage.read(key: _etebaseAccountDataKey);
