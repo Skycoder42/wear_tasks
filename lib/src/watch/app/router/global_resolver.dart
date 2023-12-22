@@ -19,7 +19,7 @@ class GlobalResolver {
   GlobalResolver(this._ref);
 
   Future<String?> call(BuildContext context, GoRouterState state) async {
-    _logger.finer('Begging redirect resolution for ${state.fullPath}');
+    _logger.finer('Checking redirect resolution for ${state.fullPath}');
     if (state.fullPath?.startsWith(const LoginRoute().location) ?? false) {
       _logger.fine('${state.fullPath}: Allowing login route');
       return null;

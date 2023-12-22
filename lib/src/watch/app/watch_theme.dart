@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'watch_theme.g.dart';
+
+@Riverpod(keepAlive: true)
+ThemeData watchTheme(WatchThemeRef ref, Color color) =>
+    WatchTheme.createThemeForColor(color);
 
 abstract base class WatchTheme {
-  static const seedColor = Color(0xFF673ab7);
+  static const appColor = Color(0xFF673ab7);
 
-  static final theme = ThemeData.from(
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: Brightness.dark,
-      background: Colors.black,
-    ),
-  ).apply(
-    (t) => t.copyWith(
-      listTileTheme: const ListTileThemeData(
-        contentPadding: EdgeInsets.zero,
-        visualDensity: VisualDensity.compact,
-      ),
-    ),
-  );
+  static ThemeData createThemeForColor(Color color) => ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: color,
+          brightness: Brightness.dark,
+          background: Colors.black,
+        ),
+      ).apply(
+        (t) => t.copyWith(
+          listTileTheme: const ListTileThemeData(
+            contentPadding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+          ),
+        ),
+      );
 }
 
 extension BuildContextX on BuildContext {

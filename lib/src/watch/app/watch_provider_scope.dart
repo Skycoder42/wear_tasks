@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -26,14 +28,17 @@ class _WatchProviderScopeState extends State<WatchProviderScope> {
   Widget build(BuildContext context) => ProviderScope(
         overrides: [
           if (_localizations != null)
-            appLocalizationsProvider.overrideWithValue(_localizations!)
+            appLocalizationsProvider.overrideWith((_) => _localizations!)
           else
             appLocalizationsProvider,
         ],
         child: widget.child,
       );
 
-  void _updateLocalizations(AppLocalizations localizations) => setState(() {
-        _localizations = localizations;
-      });
+  void _updateLocalizations(AppLocalizations localizations) =>
+      scheduleMicrotask(
+        () => setState(() {
+          _localizations = localizations;
+        }),
+      );
 }

@@ -14,6 +14,7 @@ class WatchAppBar extends StatelessWidget {
         toolbarHeight: 8,
         collapsedHeight: 8,
         expandedHeight: 32,
+        automaticallyImplyLeading: false,
         flexibleSpace: FlexibleSpaceBar(
           titlePadding: const EdgeInsets.only(bottom: 8),
           title: title,

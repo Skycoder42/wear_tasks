@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../services/account_service.dart';
+import '../../app/router/watch_router.dart';
 import '../../widgets/watch_scaffold.dart';
+import '../create_task/create_reminder_page.dart';
 
 class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
@@ -11,8 +12,13 @@ class HomePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => WatchScaffold(
         title: const Text('Home'),
         body: Center(
-          child: Text(
-            ref.watch(etebaseAccountProvider).toString(),
+          child: Hero(
+            tag: CreateTaskPage.createButtonHeroTag,
+            child: FilledButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('Create Task'),
+              onPressed: () => const CreateTaskRoute().go(context),
+            ),
           ),
         ),
       );

@@ -23,8 +23,8 @@ class WatchApp extends ConsumerWidget {
         onGenerateTitle: (context) => context.strings.app_name,
 
         // theming
-        color: WatchTheme.seedColor,
-        theme: WatchTheme.theme,
+        color: WatchTheme.appColor,
+        theme: ref.watch(watchThemeProvider(WatchTheme.appColor)),
         themeMode: ThemeMode.dark,
 
         // app configuration

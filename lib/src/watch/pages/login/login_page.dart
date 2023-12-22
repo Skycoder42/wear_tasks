@@ -76,8 +76,6 @@ class LoginPage extends HookConsumerWidget {
       loadingOverlayActive: loginState is AsyncLoading,
       body: SafeArea(
         top: false,
-        left: false,
-        right: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: SubmitForm(
