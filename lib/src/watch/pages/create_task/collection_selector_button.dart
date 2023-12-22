@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app/watch_theme.dart';
 import '../../widgets/side_button.dart';
+import 'collection_selector_list.dart';
 
 typedef CollectionInfo = ({
   String uid,
@@ -47,14 +48,18 @@ class CollectionSelectorButton extends HookConsumerWidget {
 
     final theme = ref.watch(watchThemeProvider(activeCollection.color));
 
-    return Theme(
-      data: theme,
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: SideButton(
-          filled: true,
-          icon: const Icon(Icons.list),
-          onPressed: () => _showOverlay(context, ref, overlayRef),
+    return PopScope(
+      canPop: overlayRef.value == null,
+      onPopInvoked: (_) => overlayRef.value = null,
+      child: Theme(
+        data: theme,
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: SideButton(
+            filled: true,
+            icon: const Icon(Icons.list),
+            onPressed: () => _showOverlay(context, ref, overlayRef),
+          ),
         ),
       ),
     );
@@ -65,28 +70,21 @@ class CollectionSelectorButton extends HookConsumerWidget {
     WidgetRef ref,
     ValueNotifier<OverlayEntry?> overlayRef,
   ) {
-    final index = collections.indexWhere((c) => c.uid == currentCollection);
-    final controller = ScrollController(initialScrollOffset: 40.0 * index);
     overlayRef.value = OverlayEntry(
-      builder: (context) => ListWheelScrollView(
-        controller: controller,
-        itemExtent: 40,
-        // offAxisFraction: -1,
-        diameterRatio: 1.25,
-        perspective: 0.004,
+      builder: (context) => Stack(
         children: [
-          for (final collection in collections)
-            Theme(
-              data: ref.watch(watchThemeProvider(collection.color)),
-              child: FilledButton.icon(
-                onPressed: () {
-                  overlayRef.value = null;
-                  onCollectionSelected(collection.uid);
-                },
-                icon: const Icon(Icons.list),
-                label: Text(collection.name),
-              ),
-            ),
+          ModalBarrier(
+            dismissible: false,
+            color: Colors.black.withOpacity(0.5),
+          ),
+          CollectionSelectorList(
+            collections: collections,
+            currentUid: currentCollection,
+            onSelected: (uid) {
+              overlayRef.value = null;
+              onCollectionSelected(uid);
+            },
+          ),
         ],
       ),
     );
