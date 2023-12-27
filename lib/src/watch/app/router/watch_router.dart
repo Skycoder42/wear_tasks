@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../pages/create_task/create_reminder_page.dart';
+import '../../pages/create_task/create_task_page.dart';
 import '../../pages/home/home_page.dart';
 import '../../pages/login/login_page.dart';
 import 'global_resolver.dart';

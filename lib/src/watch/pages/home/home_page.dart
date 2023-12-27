@@ -3,7 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app/router/watch_router.dart';
 import '../../widgets/watch_scaffold.dart';
-import '../create_task/create_reminder_page.dart';
+import '../create_task/create_task_page.dart';
 
 class HomePage extends HookConsumerWidget {
   const HomePage({super.key});

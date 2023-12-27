@@ -9,7 +9,7 @@ import '../services/account_service.dart';
 part 'collection_repository.g.dart';
 
 // coverage:ignore-start
-@riverpod
+@Riverpod(keepAlive: true)
 Future<CollectionRepository> collectionRepository(
   CollectionRepositoryRef ref,
 ) async {
@@ -17,9 +17,7 @@ Future<CollectionRepository> collectionRepository(
   final repository = CollectionRepository(
     await account.getCollectionManager(),
   );
-  ref
-    ..onDispose(repository.dispose)
-    ..keepAlive();
+  ref.onDispose(repository.dispose);
   return repository;
 }
 // coverage:ignore-end
@@ -64,6 +62,11 @@ class CollectionRepository {
   Future<EtebaseItemMetadata> getMeta(String uid) async {
     final collection = await _getCol(uid);
     return collection.getMeta();
+  }
+
+  Future<EtebaseItemManager> getItemManager(String uid) async {
+    final collection = await _getCol(uid);
+    return _collectionManager.getItemManager(collection);
   }
 
   Future<String> create(EtebaseItemMetadata metadata) async {

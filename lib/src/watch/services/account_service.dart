@@ -12,7 +12,7 @@ class NotLoggedInException implements Exception {
   String toString() => 'NotLoggedInException: The app is not logged in.';
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<EtebaseAccount> etebaseAccount(EtebaseAccountRef ref) async {
   final account = await ref.watch(accountServiceProvider.future);
   if (account != null) {
