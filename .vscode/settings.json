@@ -3,6 +3,8 @@
     "autocorrect",
     "autovalidate",
     "etebase",
-    "stringifier"
+    "stoken",
+    "stringifier",
+    "vtodo"
   ]
 }

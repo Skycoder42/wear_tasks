@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -5,13 +6,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app/watch_theme.dart';
 import '../../widgets/side_button.dart';
+import 'collection_infos.dart';
 import 'collection_selector_list.dart';
-
-typedef CollectionInfo = ({
-  String uid,
-  Color color,
-  String name,
-});
 
 typedef CollectionSelectedCallback = void Function(String uid);
 
@@ -20,17 +16,27 @@ class CollectionSelectorButton extends HookConsumerWidget {
   final String currentCollection;
   final CollectionSelectedCallback onCollectionSelected;
 
-  const CollectionSelectorButton({
+  CollectionSelectorButton({
     super.key,
     required this.collections,
     required this.currentCollection,
     required this.onCollectionSelected,
-  });
+  }) {
+    if (collections.isEmpty) {
+      throw ArgumentError.value(
+        collections,
+        'collections',
+        'must not be empty',
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeCollection = useMemoized(
-      () => collections.singleWhere((c) => c.uid == currentCollection),
+      () =>
+          collections.singleWhereOrNull((c) => c.uid == currentCollection) ??
+          collections.first,
       [collections, currentCollection],
     );
 
@@ -46,7 +52,9 @@ class CollectionSelectorButton extends HookConsumerWidget {
       [overlayRef.value],
     );
 
-    final theme = ref.watch(watchThemeProvider(activeCollection.color));
+    final theme = ref.watch(
+      watchThemeProvider(activeCollection.color ?? WatchTheme.appColor),
+    );
 
     return PopScope(
       canPop: overlayRef.value == null,

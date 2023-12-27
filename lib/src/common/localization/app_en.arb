@@ -1,5 +1,17 @@
 {
   "app_name": "Wear-Tasks",
+  "default_collection_name": "Default tasks",
+  "default_collection_description": "Created by {appName} (Version {version})",
+  "@default_collection_description": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "login_page_title": "Login",
   "login_page_username_label": "Username",
   "login_page_password_label": "Password",

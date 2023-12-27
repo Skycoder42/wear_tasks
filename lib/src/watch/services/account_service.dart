@@ -8,23 +8,19 @@ import 'settings_service.dart';
 part 'account_service.g.dart';
 
 class NotLoggedInException implements Exception {
-  final Object? innerException;
-  final StackTrace? innerStackTrace;
-
-  NotLoggedInException([this.innerException, this.innerStackTrace]);
-
   @override
-  String toString() => 'NotLoggedInException: $innerException';
+  String toString() => 'NotLoggedInException: The app is not logged in.';
 }
 
 @riverpod
-EtebaseAccount etebaseAccount(EtebaseAccountRef ref) =>
-    switch (ref.watch(accountServiceProvider)) {
-      AsyncData(value: final EtebaseAccount account) => account,
-      AsyncError(error: final e, stackTrace: final s) =>
-        throw NotLoggedInException(e, s),
-      _ => throw NotLoggedInException(),
-    };
+Future<EtebaseAccount> etebaseAccount(EtebaseAccountRef ref) async {
+  final account = await ref.watch(accountServiceProvider.future);
+  if (account != null) {
+    return account;
+  } else {
+    throw NotLoggedInException();
+  }
+}
 
 @Riverpod(keepAlive: true)
 class AccountService extends _$AccountService {

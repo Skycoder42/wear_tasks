@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app/watch_theme.dart';
+import 'collection_infos.dart';
 import 'collection_selector_button.dart';
 
 class CollectionSelectorList extends HookConsumerWidget {
@@ -39,14 +40,16 @@ class CollectionSelectorList extends HookConsumerWidget {
       children: [
         for (final collection in collections)
           Theme(
-            data: ref.watch(watchThemeProvider(collection.color)),
+            data: ref.watch(
+              watchThemeProvider(collection.color ?? WatchTheme.appColor),
+            ),
             child: FilledButton.icon(
               onPressed: () async {
                 await animationController.reverse();
                 onSelected(collection.uid);
               },
               icon: const Icon(Icons.list),
-              label: Text(collection.name),
+              label: Text(collection.name ?? collection.uid),
             ),
           ),
       ],
