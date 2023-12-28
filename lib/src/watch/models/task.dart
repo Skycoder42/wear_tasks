@@ -25,7 +25,8 @@ enum TaskPriority {
 @freezed
 sealed class Task with _$Task {
   const factory Task({
-    required String uid,
+    required String collectionUid,
+    required String taskUid,
     required DateTime createdAt,
     required String summary,
     DateTime? dueDate,

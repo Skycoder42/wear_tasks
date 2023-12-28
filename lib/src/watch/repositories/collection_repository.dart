@@ -50,8 +50,9 @@ class CollectionRepository {
 
       for (final item in await response.getData()) {
         final uid = await item.getUid();
-        _collections[uid] = item;
-        yield uid;
+        if (_updateCache(uid, item)) {
+          yield uid;
+        }
       }
 
       _stoken = await response.getStoken();
@@ -79,7 +80,7 @@ class CollectionRepository {
     try {
       final uid = await collection.getUid();
       await _collectionManager.upload(collection);
-      _collections[uid] = collection;
+      _updateCache(uid, collection);
       return uid;
 
       // ignore: avoid_catches_without_on_clauses
@@ -100,14 +101,24 @@ class CollectionRepository {
     }
 
     final collection = await _collectionManager.fetch(uid);
-    return _collections.update(
+    _updateCache(uid, collection);
+    return collection;
+  }
+
+  bool _updateCache(String uid, EtebaseCollection collection) {
+    var didCreate = false;
+    _collections.update(
       uid,
       (oldValue) {
         unawaited(oldValue.dispose());
         return collection;
       },
-      ifAbsent: () => collection,
+      ifAbsent: () {
+        didCreate = true;
+        return collection;
+      },
     );
+    return didCreate;
   }
 
   Future<void> _clearCache() async {

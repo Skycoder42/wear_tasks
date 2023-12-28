@@ -27,10 +27,19 @@ class WatchScaffold extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         body: Stack(
           children: [
-            body,
+            Padding(
+              padding: horizontalSafeArea
+                  ? EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).padding.bottom,
+                    )
+                  : EdgeInsets.zero,
+              child: body,
+            ),
             if (showClock)
-              const Align(
-                alignment: Alignment.topCenter,
+              const Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
                 child: ClockBar(),
               ),
             if (ModalRoute.of(context)?.impliesAppBarDismissal ?? false)

@@ -192,9 +192,7 @@ class LoginPage extends HookConsumerWidget {
   }
 
   String? _validateNotNullOrEmpty(BuildContext context, String? value) =>
-      (value?.isEmpty ?? true)
-          ? context.strings.login_page_validator_not_empty
-          : null;
+      (value?.isEmpty ?? true) ? context.strings.validator_not_empty : null;
 
   String? _validateHttpUrl(BuildContext context, String? value) {
     if (_validateNotNullOrEmpty(context, value) case final String error) {
@@ -203,7 +201,7 @@ class LoginPage extends HookConsumerWidget {
 
     final url = Uri.tryParse(value!);
     if (url == null || !url.isAbsolute || !url.isScheme('https')) {
-      return context.strings.login_page_validator_https_url;
+      return context.strings.validator_https_url;
     }
 
     return null;

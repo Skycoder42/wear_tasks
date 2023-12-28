@@ -22,6 +22,7 @@ class SettingsService {
   static const _initKey = '__init';
   static const _etebaseAccountDataKey = 'etebase.accountData';
   static const _etebaseServerUrlKey = 'etebase.serverUrl';
+  static const _etebaseDefaultCollectionKey = 'etebase.defaultCollection';
 
   final FlutterSecureStorage _secureStorage;
 
@@ -59,4 +60,16 @@ class SettingsService {
 
   Future<void> removeEtebaseServerUrl() =>
       _secureStorage.delete(key: _etebaseAccountDataKey);
+
+  Future<String?> getEtebaseDefaultCollection() =>
+      _secureStorage.read(key: _etebaseDefaultCollectionKey);
+
+  Future<void> setEtebaseDefaultCollection(String defaultCollection) =>
+      _secureStorage.write(
+        key: _etebaseDefaultCollectionKey,
+        value: defaultCollection,
+      );
+
+  Future<void> removeEtebaseDefaultCollection() =>
+      _secureStorage.delete(key: _etebaseDefaultCollectionKey);
 }

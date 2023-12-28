@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -36,11 +38,19 @@ class ClockBar extends HookWidget {
       onTimeout,
     );
 
-    return Padding(
-      padding: const EdgeInsets.all(4),
-      child: Text(
-        context.strings.clock_bar_time(now.value),
-        style: context.theme.textTheme.bodySmall,
+    return Container(
+      decoration: const BoxDecoration(),
+      clipBehavior: Clip.hardEdge,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Text(
+            context.strings.clock_bar_time(now.value),
+            textAlign: TextAlign.center,
+            style: context.theme.textTheme.bodySmall,
+          ),
+        ),
       ),
     );
   }

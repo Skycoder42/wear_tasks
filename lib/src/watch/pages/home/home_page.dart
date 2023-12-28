@@ -10,6 +10,7 @@ class HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => WatchScaffold(
+        horizontalSafeArea: true,
         body: Center(
           child: Hero(
             tag: CreateTaskPage.createButtonHeroTag,

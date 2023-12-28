@@ -32,17 +32,17 @@ class CreateTaskService extends _$CreateTaskService {
   @override
   CreateTaskState build() => const CreateTaskState.ready();
 
-  Future<void> createTask(String collectionUid, Task task) async {
+  Future<void> createTask(Task task) async {
     state = const CreateTaskState.saving();
     try {
       final taskFactory = await ref.read(taskFactoryProvider.future);
       final repository =
-          await ref.read(itemRepositoryProvider(collectionUid).future);
+          await ref.read(itemRepositoryProvider(task.collectionUid).future);
 
       final calendar = taskFactory.createTask(task);
       await repository.create(
         EtebaseItemMetadata(
-          name: task.uid,
+          name: task.taskUid,
           mtime: task.createdAt,
         ),
         calendar,

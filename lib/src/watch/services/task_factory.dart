@@ -24,7 +24,7 @@ class TaskFactory {
 
   ICalendar createTask(Task task) {
     final vtodo = ICalBlock('VTODO')
-      ..add(ICalProperty('UID', task.uid))
+      ..add(ICalProperty('UID', task.taskUid))
       ..add(ICalProperty('DTSTAMP', task.createdAt.toICalString()))
       ..add(ICalProperty('CREATED', task.createdAt.toICalString()))
       ..add(ICalProperty('LAST-MODIFIED', task.createdAt.toICalString()))
