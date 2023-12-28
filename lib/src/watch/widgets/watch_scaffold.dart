@@ -2,22 +2,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../app/watch_theme.dart';
+import 'clock_bar.dart';
 import 'side_button.dart';
-import 'watch_app_bar.dart';
 
 class WatchScaffold extends StatelessWidget {
-  final Widget? title;
   final Widget? rightAction;
   final Widget? bottomAction;
+  final bool showClock;
   final bool horizontalSafeArea;
   final bool loadingOverlayActive;
   final Widget body;
 
   const WatchScaffold({
     super.key,
-    this.title,
     this.rightAction,
     this.bottomAction,
+    this.showClock = true,
     this.horizontalSafeArea = false,
     this.loadingOverlayActive = false,
     required this.body,
@@ -27,12 +27,12 @@ class WatchScaffold extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         body: Stack(
           children: [
-            CustomScrollView(
-              slivers: [
-                if (title != null) WatchAppBar(title: title!),
-                SliverToBoxAdapter(child: body),
-              ],
-            ),
+            body,
+            if (showClock)
+              const Align(
+                alignment: Alignment.topCenter,
+                child: ClockBar(),
+              ),
             if (ModalRoute.of(context)?.impliesAppBarDismissal ?? false)
               Align(
                 alignment: Alignment.centerLeft,
@@ -75,6 +75,7 @@ class WatchScaffold extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
+      ..add(DiagnosticsProperty<bool>('showClock', showClock))
       ..add(
         DiagnosticsProperty<bool>('horizontalSafeArea', horizontalSafeArea),
       )

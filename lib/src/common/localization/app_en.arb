@@ -20,7 +20,15 @@
       }
     }
   },
-  "login_page_title": "Login",
+  "clock_bar_time": "{time}",
+  "@clock_bar_time": {
+    "placeholders": {
+      "time": {
+        "type": "DateTime",
+        "format": "Hm"
+      }
+    }
+  },
   "login_page_username_label": "Username",
   "login_page_password_label": "Password",
   "login_page_use_default_url_label": "Use default server",

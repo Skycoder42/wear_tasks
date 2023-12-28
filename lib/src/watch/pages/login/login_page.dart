@@ -72,91 +72,94 @@ class LoginPage extends HookConsumerWidget {
     );
 
     return WatchScaffold(
-      title: Text(context.strings.login_page_title),
       loadingOverlayActive: loginState is AsyncLoading,
-      body: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: SubmitForm(
-            onValidationFailed: () =>
-                ScaffoldMessenger.of(context).showSnackBar(
-              ErrorSnackBar(
-                context: context,
-                content: Text(context.strings.login_page_invalid),
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: SubmitForm(
+              onValidationFailed: () =>
+                  ScaffoldMessenger.of(context).showSnackBar(
+                ErrorSnackBar(
+                  context: context,
+                  content: Text(context.strings.login_page_invalid),
+                ),
               ),
-            ),
-            onSubmit: (result) => unawaited(
-              ref.read(accountServiceProvider.notifier).login(
-                    result[_usernameKey] as String,
-                    result[_passwordKey] as String,
-                    result[_useDefaultServerKey] as bool
-                        ? null
-                        : result[_customServerUrlKey] as Uri,
-                  ),
-            ),
-            builder: (context, onSaved, onSubmit) => Column(
-              children: [
-                TextFormField(
-                  enabled: formEnabled,
-                  decoration: InputDecoration(
-                    alignLabelWithHint: true,
-                    label: Text(context.strings.login_page_username_label),
-                  ),
-                  validator: (value) => _validateNotNullOrEmpty(context, value),
-                  onSaved: (newValue) => onSaved(_usernameKey, newValue),
-                ),
-                TextFormField(
-                  enabled: formEnabled,
-                  decoration: InputDecoration(
-                    alignLabelWithHint: true,
-                    label: Text(context.strings.login_page_password_label),
-                  ),
-                  obscureText: true,
-                  autocorrect: false,
-                  enableIMEPersonalizedLearning: false,
-                  enableSuggestions: false,
-                  spellCheckConfiguration:
-                      const SpellCheckConfiguration.disabled(),
-                  validator: (value) => _validateNotNullOrEmpty(context, value),
-                  onSaved: (newValue) => onSaved(_passwordKey, newValue),
-                ),
-                const SizedBox(height: 8),
-                CheckboxFormField(
-                  enabled: formEnabled,
-                  title: Text(
-                    context.strings.login_page_use_default_url_label,
-                  ),
-                  subtitle:
-                      defaultServerUrl != null ? Text(defaultServerUrl) : null,
-                  initialValue: useDefaultServer.value,
-                  onChanged: (v) => useDefaultServer.value = v ?? true,
-                  validator: serverUrlErrorValidator,
-                  onSaved: (newValue) =>
-                      onSaved(_useDefaultServerKey, newValue),
-                ),
-                if (!useDefaultServer.value)
+              onSubmit: (result) => unawaited(
+                ref.read(accountServiceProvider.notifier).login(
+                      result[_usernameKey] as String,
+                      result[_passwordKey] as String,
+                      result[_useDefaultServerKey] as bool
+                          ? null
+                          : result[_customServerUrlKey] as Uri,
+                    ),
+              ),
+              builder: (context, onSaved, onSubmit) => Column(
+                children: [
                   TextFormField(
                     enabled: formEnabled,
-                    controller: customServerUrlController,
                     decoration: InputDecoration(
                       alignLabelWithHint: true,
-                      label: Text(
-                        context.strings.login_page_server_url_label,
-                      ),
+                      label: Text(context.strings.login_page_username_label),
                     ),
-                    keyboardType: TextInputType.url,
-                    readOnly: useDefaultServer.value,
-                    validator: (v) => _validateHttpUrl(context, v),
-                    onSaved: (newValue) =>
-                        onSaved(_customServerUrlKey, Uri.parse(newValue!)),
+                    validator: (value) =>
+                        _validateNotNullOrEmpty(context, value),
+                    onSaved: (newValue) => onSaved(_usernameKey, newValue),
                   ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: onSubmit,
-                  child: Text(context.strings.login_page_login_button),
-                ),
-              ],
+                  TextFormField(
+                    enabled: formEnabled,
+                    decoration: InputDecoration(
+                      alignLabelWithHint: true,
+                      label: Text(context.strings.login_page_password_label),
+                    ),
+                    obscureText: true,
+                    autocorrect: false,
+                    enableIMEPersonalizedLearning: false,
+                    enableSuggestions: false,
+                    spellCheckConfiguration:
+                        const SpellCheckConfiguration.disabled(),
+                    validator: (value) =>
+                        _validateNotNullOrEmpty(context, value),
+                    onSaved: (newValue) => onSaved(_passwordKey, newValue),
+                  ),
+                  const SizedBox(height: 8),
+                  CheckboxFormField(
+                    enabled: formEnabled,
+                    title: Text(
+                      context.strings.login_page_use_default_url_label,
+                    ),
+                    subtitle: defaultServerUrl != null
+                        ? Text(defaultServerUrl)
+                        : null,
+                    initialValue: useDefaultServer.value,
+                    onChanged: (v) => useDefaultServer.value = v ?? true,
+                    validator: serverUrlErrorValidator,
+                    onSaved: (newValue) =>
+                        onSaved(_useDefaultServerKey, newValue),
+                  ),
+                  if (!useDefaultServer.value)
+                    TextFormField(
+                      enabled: formEnabled,
+                      controller: customServerUrlController,
+                      decoration: InputDecoration(
+                        alignLabelWithHint: true,
+                        label: Text(
+                          context.strings.login_page_server_url_label,
+                        ),
+                      ),
+                      keyboardType: TextInputType.url,
+                      readOnly: useDefaultServer.value,
+                      validator: (v) => _validateHttpUrl(context, v),
+                      onSaved: (newValue) =>
+                          onSaved(_customServerUrlKey, Uri.parse(newValue!)),
+                    ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: onSubmit,
+                    child: Text(context.strings.login_page_login_button),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
