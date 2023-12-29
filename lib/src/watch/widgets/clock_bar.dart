@@ -42,7 +42,7 @@ class ClockBar extends HookWidget {
       decoration: const BoxDecoration(),
       clipBehavior: Clip.hardEdge,
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+        filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
         child: Padding(
           padding: const EdgeInsets.all(4),
           child: Text(

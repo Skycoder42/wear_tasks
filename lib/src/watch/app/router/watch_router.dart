@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../pages/create_task/create_task_page.dart';
+import '../../pages/date_time_selection/date_picker_page.dart';
+import '../../pages/date_time_selection/date_time_selection_page.dart';
+import '../../pages/date_time_selection/time_picker_page.dart';
 import '../../pages/home/home_page.dart';
 import '../../pages/login/login_page.dart';
 import 'global_resolver.dart';
@@ -40,6 +43,42 @@ class CreateTaskRoute extends GoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const CreateTaskPage();
+}
+
+@TypedGoRoute<DateTimeSelectionRoute>(path: '/select-date-time')
+@immutable
+class DateTimeSelectionRoute extends GoRouteData {
+  final DateTime initialDateTime;
+
+  const DateTimeSelectionRoute(this.initialDateTime);
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      DateTimeSelectionPage(initialDateTime: initialDateTime);
+}
+
+@TypedGoRoute<TimePickerRoute>(path: '/time-picker')
+@immutable
+class TimePickerRoute extends GoRouteData {
+  final DateTime initialTime;
+
+  const TimePickerRoute(this.initialTime);
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      TimePickerPage(initialTime: initialTime);
+}
+
+@TypedGoRoute<DatePickerRoute>(path: '/date-picker')
+@immutable
+class DatePickerRoute extends GoRouteData {
+  final DateTime initialDate;
+
+  const DatePickerRoute(this.initialDate);
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      DatePickerPage(initialDate: initialDate);
 }
 
 @TypedGoRoute<LoginRoute>(path: '/login')

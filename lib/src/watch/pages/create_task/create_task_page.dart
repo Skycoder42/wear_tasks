@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../common/extensions/riverpod_extensions.dart';
@@ -7,6 +8,7 @@ import '../../../common/localization/localization.dart';
 import '../../../common/providers/uuid_provider.dart';
 import '../../../common/widgets/error_snack_bar.dart';
 import '../../../common/widgets/success_snack_bar.dart';
+import '../../app/router/watch_router.dart';
 import '../../models/task.dart';
 import '../../widgets/submit_form.dart';
 import '../../widgets/watch_scaffold.dart';
@@ -14,9 +16,11 @@ import 'active_collection.dart';
 import 'collection_infos.dart';
 import 'collection_selector_button.dart';
 import 'create_task_service.dart';
+import 'priority_button.dart';
 
 class CreateTaskPage extends HookConsumerWidget {
   static const _summaryKey = 'summary';
+  static const _descriptionKey = 'description';
 
   static const createButtonHeroTag = 'CreateTaskPage.createButtonHero';
 
@@ -24,6 +28,13 @@ class CreateTaskPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final initialDueDate = useMemoized(() {
+      final now = DateTime.now();
+      return DateTime(now.year, now.month, now.day + 1, 9);
+    });
+    final currentDueDate = useState(initialDueDate);
+    final currentPriority = useState(TaskPriority.none);
+
     final collectionInfos = ref.watch(collectionInfosProvider);
     final activeCollection = ref.watch(activeCollectionProvider);
     final createTaskState = ref.watch(createTaskServiceProvider);
@@ -60,9 +71,15 @@ class CreateTaskPage extends HookConsumerWidget {
         ref,
         activeCollection.requireValue,
         result[_summaryKey] as String,
+        currentPriority.value,
+        result[_descriptionKey] as String?,
       ),
       builder: (context, onSaved, onSubmit) => WatchScaffold(
         loadingOverlayActive: isProcessing,
+        leftAction: PriorityButton(
+          currentPriority: currentPriority.value,
+          onPriorityChanged: (p) => currentPriority.value = p,
+        ),
         rightAction: collectionInfos.hasValue && activeCollection.hasValue
             ? CollectionSelectorButton(
                 collections: collectionInfos.requireValue,
@@ -78,22 +95,52 @@ class CreateTaskPage extends HookConsumerWidget {
             child: const Icon(Icons.add),
           ),
         ),
-        horizontalSafeArea: true,
         body: SingleChildScrollView(
           child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  enabled: !isProcessing,
-                  decoration: InputDecoration(
-                    alignLabelWithHint: true,
-                    label: Text(context.strings.create_task_page_summary_label),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 36),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextFormField(
+                    enabled: !isProcessing,
+                    decoration: InputDecoration(
+                      alignLabelWithHint: true,
+                      label:
+                          Text(context.strings.create_task_page_summary_label),
+                    ),
+                    validator: (value) =>
+                        _validateNotNullOrEmpty(context, value),
+                    onSaved: (newValue) => onSaved(_summaryKey, newValue),
                   ),
-                  validator: (value) => _validateNotNullOrEmpty(context, value),
-                  onSaved: (newValue) => onSaved(_summaryKey, newValue),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.watch_later_outlined),
+                    label: Text(
+                      context.strings.taskDueDescription(currentDueDate.value),
+                    ),
+                    onPressed: () async {
+                      final newDueDate =
+                          await DateTimeSelectionRoute(currentDueDate.value)
+                              .push<DateTime>(context);
+                      if (newDueDate != null) {
+                        currentDueDate.value = newDueDate;
+                      }
+                    },
+                  ),
+                  TextFormField(
+                    enabled: !isProcessing,
+                    decoration: InputDecoration(
+                      alignLabelWithHint: true,
+                      label: Text(
+                        context.strings.create_task_page_description_label,
+                      ),
+                    ),
+                    onSaved: (newValue) => onSaved(_descriptionKey, newValue),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
           ),
         ),
@@ -105,12 +152,16 @@ class CreateTaskPage extends HookConsumerWidget {
     WidgetRef ref,
     String collectionUid,
     String summary,
+    TaskPriority priority,
+    String? description,
   ) async {
     final task = Task(
       collectionUid: collectionUid,
       taskUid: ref.read(uuidProvider).v4(),
       createdAt: DateTime.now(),
       summary: summary,
+      priority: priority,
+      description: (description?.isEmpty ?? true) ? null : description,
     );
 
     final taskService = ref.read(createTaskServiceProvider.notifier);

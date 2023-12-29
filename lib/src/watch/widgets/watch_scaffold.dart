@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 import '../app/watch_theme.dart';
 import 'clock_bar.dart';
-import 'side_button.dart';
 
 class WatchScaffold extends StatelessWidget {
+  final Widget? leftAction;
   final Widget? rightAction;
   final Widget? bottomAction;
   final bool showClock;
@@ -15,6 +15,7 @@ class WatchScaffold extends StatelessWidget {
 
   const WatchScaffold({
     super.key,
+    this.leftAction,
     this.rightAction,
     this.bottomAction,
     this.showClock = true,
@@ -42,14 +43,6 @@ class WatchScaffold extends StatelessWidget {
                 right: 0,
                 child: ClockBar(),
               ),
-            if (ModalRoute.of(context)?.impliesAppBarDismissal ?? false)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: SideButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () async => Navigator.maybePop(context),
-                ),
-              ),
             if (bottomAction != null)
               Positioned(
                 bottom: 0,
@@ -61,6 +54,11 @@ class WatchScaffold extends StatelessWidget {
                   ),
                   child: bottomAction,
                 ),
+              ),
+            if (leftAction != null)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: leftAction,
               ),
             if (rightAction != null)
               Align(

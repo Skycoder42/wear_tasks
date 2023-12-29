@@ -1,5 +1,42 @@
 {
   "app_name": "Wear-Tasks",
+  "task_due_time": "{dueDate}",
+  "@task_due_time": {
+    "placeholders": {
+      "dueDate": {
+        "type": "DateTime",
+        "format": "Hm"
+      }
+    }
+  },
+  "task_due_date": "{dueDate}",
+  "@task_due_date": {
+    "placeholders": {
+      "dueDate": {
+        "type": "DateTime",
+        "format": "Md"
+      }
+    }
+  },
+  "task_due_year": "{dueDate}",
+  "@task_due_year": {
+    "placeholders": {
+      "dueDate": {
+        "type": "DateTime",
+        "format": "y"
+      }
+    }
+  },
+  "task_due_date_full": "{dueDate}",
+  "@task_due_date_full": {
+    "placeholders": {
+      "dueDate": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
+  "task_due_past": "Past",
   "default_collection_name": "Default tasks",
   "default_collection_description": "Created by {appName} (Version {version})",
   "@default_collection_description": {
@@ -37,6 +74,7 @@
   "login_page_invalid": "Incomplete form",
   "login_page_succeeded": "Login successful!",
   "create_task_page_summary_label": "Summary",
+  "create_task_page_description_label": "Description",
   "validator_not_empty": "Must not be empty",
   "validator_https_url": "Must be a valid HTTPS url",
   "create_task_page_success_message": "Task created!",
