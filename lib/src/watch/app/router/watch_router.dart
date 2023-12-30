@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../models/task_recurrence.dart';
 import '../../pages/create_task/create_task_page.dart';
 import '../../pages/date_time_selection/date_picker_page.dart';
 import '../../pages/date_time_selection/date_time_selection_page.dart';
+import '../../pages/date_time_selection/recurrence_selection_page.dart';
 import '../../pages/date_time_selection/time_picker_page.dart';
 import '../../pages/home/home_page.dart';
 import '../../pages/login/login_page.dart';
@@ -48,37 +50,51 @@ class CreateTaskRoute extends GoRouteData {
 @TypedGoRoute<DateTimeSelectionRoute>(path: '/select-date-time')
 @immutable
 class DateTimeSelectionRoute extends GoRouteData {
-  final DateTime initialDateTime;
+  final DateTime $extra;
 
-  const DateTimeSelectionRoute(this.initialDateTime);
+  const DateTimeSelectionRoute(this.$extra);
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      DateTimeSelectionPage(initialDateTime: initialDateTime);
+      DateTimeSelectionPage(initialDateTime: $extra);
 }
 
 @TypedGoRoute<TimePickerRoute>(path: '/time-picker')
 @immutable
 class TimePickerRoute extends GoRouteData {
-  final DateTime initialTime;
+  final DateTime $extra;
 
-  const TimePickerRoute(this.initialTime);
+  const TimePickerRoute(this.$extra);
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      TimePickerPage(initialTime: initialTime);
+      TimePickerPage(initialTime: $extra);
 }
 
 @TypedGoRoute<DatePickerRoute>(path: '/date-picker')
 @immutable
 class DatePickerRoute extends GoRouteData {
-  final DateTime initialDate;
+  final DateTime $extra;
 
-  const DatePickerRoute(this.initialDate);
+  const DatePickerRoute(this.$extra);
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      DatePickerPage(initialDate: initialDate);
+      DatePickerPage(initialDate: $extra);
+}
+
+@TypedGoRoute<RecurrenceSelectionRoute>(path: '/recurrence-selection')
+@immutable
+class RecurrenceSelectionRoute extends GoRouteData {
+  final TaskRecurrence? $extra;
+
+  const RecurrenceSelectionRoute(this.$extra);
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      RecurrenceSelectionPage(
+        initialRecurrence: $extra,
+      );
 }
 
 @TypedGoRoute<LoginRoute>(path: '/login')

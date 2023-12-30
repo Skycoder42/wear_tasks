@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'task_recurrence.dart';
+
 part 'task.freezed.dart';
 
 enum TaskStatus {
@@ -30,6 +32,7 @@ sealed class Task with _$Task {
     required DateTime createdAt,
     required String summary,
     DateTime? dueDate,
+    TaskRecurrence? recurrence,
     @Default(TaskStatus.needsAction) TaskStatus status,
     @Default(TaskPriority.none) TaskPriority priority,
     String? description,

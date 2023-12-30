@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../common/localization/localization.dart';
 import '../../app/router/watch_router.dart';
+import '../../models/task_recurrence.dart';
 import '../../widgets/watch_dialog.dart';
 
 class DateTimeSelectionPage extends HookConsumerWidget {
@@ -15,16 +16,14 @@ class DateTimeSelectionPage extends HookConsumerWidget {
     required this.initialDateTime,
   });
 
-  // Date
-  // Time
-  // (Loop)
-  // predefined Expressions
+  // TODO predefined Expressions
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentDateTime = useState(
       initialDateTime.copyWith(second: 0, millisecond: 0, microsecond: 0),
     );
+    final currentRecurrence = useState<TaskRecurrence?>(null);
 
     return WatchDialog<DateTime>(
       onAccept: () => currentDateTime.value,
@@ -65,8 +64,16 @@ class DateTimeSelectionPage extends HookConsumerWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.event_repeat),
-                onPressed: () {},
+                icon: Icon(
+                  currentRecurrence.value != null
+                      ? Icons.repeat_on_outlined
+                      : Icons.repeat_outlined,
+                ),
+                onPressed: () async {
+                  currentRecurrence.value =
+                      await RecurrenceSelectionRoute(currentRecurrence.value)
+                          .push<TaskRecurrence>(context);
+                },
               ),
             ],
           ),
