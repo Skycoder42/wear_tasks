@@ -75,6 +75,33 @@
   "login_page_succeeded": "Login successful!",
   "create_task_page_summary_label": "Summary",
   "create_task_page_description_label": "Description",
+  "date_picker_day": "{date}.",
+  "@date_picker_day": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "d"
+      }
+    }
+  },
+  "date_picker_month": "{date}",
+  "@date_picker_month": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMM"
+      }
+    }
+  },
+  "date_picker_year": "{date}",
+  "@date_picker_year": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "y"
+      }
+    }
+  },
   "validator_not_empty": "Must not be empty",
   "validator_https_url": "Must be a valid HTTPS url",
   "create_task_page_success_message": "Task created!",

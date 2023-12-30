@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../widgets/side_button.dart';
 import '../../widgets/watch_dialog.dart';
 
 class TimePickerPage extends HookWidget {
@@ -17,24 +18,30 @@ class TimePickerPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initialIntervalDateTime = useMemoized(
-      () => initialTime.copyWith(
-        minute:
-            (initialTime.minute / _minuteInterval).round() * _minuteInterval,
-      ),
-      [initialTime],
-    );
-    final currentDateTime = useState(initialIntervalDateTime);
+    final pickerKey = useState(GlobalKey());
+    final currentDateTime = useState(_toIntervalTime(initialTime));
 
     return WatchDialog<TimeOfDay>(
       horizontalSafeArea: true,
       onAccept: () => TimeOfDay.fromDateTime(currentDateTime.value),
-      body: CupertinoDatePicker(
-        mode: CupertinoDatePickerMode.time,
-        use24hFormat: true,
-        minuteInterval: 5,
-        initialDateTime: initialIntervalDateTime,
-        onDateTimeChanged: (value) => currentDateTime.value = value,
+      bottomAction: Center(
+        child: SideButton(
+          icon: const Icon(Icons.today_outlined),
+          onPressed: () {
+            currentDateTime.value = _toIntervalTime(DateTime.now());
+            pickerKey.value = GlobalKey();
+          },
+        ),
+      ),
+      body: SafeArea(
+        child: CupertinoDatePicker(
+          key: pickerKey.value,
+          mode: CupertinoDatePickerMode.time,
+          use24hFormat: true,
+          minuteInterval: 5,
+          initialDateTime: currentDateTime.value,
+          onDateTimeChanged: (value) => currentDateTime.value = value,
+        ),
       ),
     );
   }
@@ -44,4 +51,8 @@ class TimePickerPage extends HookWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<DateTime>('initialTime', initialTime));
   }
+
+  DateTime _toIntervalTime(DateTime dateTime) => dateTime.copyWith(
+        minute: (dateTime.minute / _minuteInterval).round() * _minuteInterval,
+      );
 }

@@ -10,6 +10,7 @@ class WatchDialog<T> extends StatelessWidget {
   final ValueCallback<T?>? onReject;
   final ValueCallback<T> onAccept;
   final bool horizontalSafeArea;
+  final Widget? bottomAction;
   final Widget body;
 
   const WatchDialog({
@@ -17,6 +18,7 @@ class WatchDialog<T> extends StatelessWidget {
     required this.onAccept,
     this.onReject,
     this.horizontalSafeArea = false,
+    this.bottomAction,
     required this.body,
   });
 
@@ -38,6 +40,7 @@ class WatchDialog<T> extends StatelessWidget {
             onPressed: () => Navigator.pop(context, onAccept()),
           ),
         ),
+        bottomAction: bottomAction,
         body: body,
       );
 
