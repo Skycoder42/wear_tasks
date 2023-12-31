@@ -26,7 +26,7 @@ class TimePickerPage extends HookWidget {
       onAccept: () => TimeOfDay.fromDateTime(currentDateTime.value),
       bottomAction: Center(
         child: SideButton(
-          icon: const Icon(Icons.today_outlined),
+          icon: const Icon(Icons.today),
           onPressed: () {
             currentDateTime.value = _toIntervalTime(DateTime.now());
             pickerKey.value = GlobalKey();

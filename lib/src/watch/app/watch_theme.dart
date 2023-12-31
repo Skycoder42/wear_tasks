@@ -21,6 +21,7 @@ abstract base class WatchTheme {
           listTileTheme: const ListTileThemeData(
             contentPadding: EdgeInsets.zero,
             visualDensity: VisualDensity.compact,
+            dense: true,
           ),
         ),
       );

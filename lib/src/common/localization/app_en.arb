@@ -102,6 +102,12 @@
       }
     }
   },
+  "recurrence_selection_page_frequency": "{frequency, select, secondly{Secondly} minutely{Minutely} hourly{Hourly} daily{Daily} weekly{Weekly} monthly{Monthly} yearly{Yearly} other{{frequency}}}",
+  "@recurrence_selection_page_frequency": {
+    "placeholders": {
+      "frequency": {}
+    }
+  },
   "validator_not_empty": "Must not be empty",
   "validator_https_url": "Must be a valid HTTPS url",
   "create_task_page_success_message": "Task created!",

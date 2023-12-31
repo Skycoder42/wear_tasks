@@ -62,7 +62,7 @@ class DatePickerPage extends HookWidget {
       horizontalSafeArea: true,
       bottomAction: Center(
         child: SideButton(
-          icon: const Icon(Icons.today_outlined),
+          icon: const Icon(Icons.today),
           onPressed: () {
             currentDateTime.value = DateTime.now();
             updateDateTime();

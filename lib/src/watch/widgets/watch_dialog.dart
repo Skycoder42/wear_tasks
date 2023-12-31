@@ -7,17 +7,19 @@ import 'watch_scaffold.dart';
 typedef ValueCallback<T> = T Function();
 
 class WatchDialog<T> extends StatelessWidget {
+  final bool horizontalSafeArea;
+  final bool canAccept;
   final ValueCallback<T?>? onReject;
   final ValueCallback<T> onAccept;
-  final bool horizontalSafeArea;
   final Widget? bottomAction;
   final Widget body;
 
   const WatchDialog({
     super.key,
+    this.horizontalSafeArea = false,
+    this.canAccept = true,
     required this.onAccept,
     this.onReject,
-    this.horizontalSafeArea = false,
     this.bottomAction,
     required this.body,
   });
@@ -28,7 +30,7 @@ class WatchDialog<T> extends StatelessWidget {
         leftAction: Padding(
           padding: const EdgeInsets.all(4),
           child: SideButton(
-            icon: const Icon(Icons.close_outlined),
+            icon: const Icon(Icons.close),
             onPressed: () => Navigator.pop(context, onReject?.call()),
           ),
         ),
@@ -37,7 +39,8 @@ class WatchDialog<T> extends StatelessWidget {
           child: SideButton(
             filled: true,
             icon: const Icon(Icons.check),
-            onPressed: () => Navigator.pop(context, onAccept()),
+            onPressed:
+                canAccept ? () => Navigator.pop(context, onAccept()) : null,
           ),
         ),
         bottomAction: bottomAction,
@@ -52,6 +55,7 @@ class WatchDialog<T> extends StatelessWidget {
       ..add(ObjectFlagProperty<ValueCallback<T?>?>.has('onReject', onReject))
       ..add(
         DiagnosticsProperty<bool>('horizontalSafeArea', horizontalSafeArea),
-      );
+      )
+      ..add(DiagnosticsProperty<bool>('canAccept', canAccept));
   }
 }

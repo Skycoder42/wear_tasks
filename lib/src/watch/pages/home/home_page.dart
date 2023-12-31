@@ -11,13 +11,15 @@ class HomePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => WatchScaffold(
         horizontalSafeArea: true,
-        body: Center(
-          child: Hero(
-            tag: CreateTaskPage.createButtonHeroTag,
-            child: FilledButton.icon(
-              icon: const Icon(Icons.add),
-              label: const Text('Create Task'),
-              onPressed: () => const CreateTaskRoute().go(context),
+        body: SafeArea(
+          child: Center(
+            child: Hero(
+              tag: CreateTaskPage.createButtonHeroTag,
+              child: FilledButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('Create Task'),
+                onPressed: () => const CreateTaskRoute().go(context),
+              ),
             ),
           ),
         ),

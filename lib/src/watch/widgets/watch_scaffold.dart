@@ -25,58 +25,61 @@ class WatchScaffold extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: Stack(
-          children: [
-            Padding(
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    return Scaffold(
+      body: Stack(
+        children: [
+          MediaQuery(
+            data: mediaQuery.copyWith(
               padding: horizontalSafeArea
-                  ? EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).padding.bottom,
-                    )
-                  : EdgeInsets.zero,
-              child: body,
+                  ? EdgeInsets.all(mediaQuery.padding.bottom)
+                  : null,
             ),
-            if (showClock)
-              const Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: ClockBar(),
-              ),
-            if (bottomAction != null)
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).padding.bottom,
-                  ),
-                  child: bottomAction,
+            child: body,
+          ),
+          if (showClock)
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: ClockBar(),
+            ),
+          if (bottomAction != null)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).padding.bottom,
                 ),
+                child: bottomAction,
               ),
-            if (leftAction != null)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: leftAction,
-              ),
-            if (rightAction != null)
-              Align(
-                alignment: Alignment.centerRight,
-                child: rightAction,
-              ),
-            if (loadingOverlayActive) ...[
-              ModalBarrier(
-                dismissible: false,
-                color: context.theme.colorScheme.background.withOpacity(0.5),
-              ),
-              const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ],
+            ),
+          if (leftAction != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: leftAction,
+            ),
+          if (rightAction != null)
+            Align(
+              alignment: Alignment.centerRight,
+              child: rightAction,
+            ),
+          if (loadingOverlayActive) ...[
+            ModalBarrier(
+              dismissible: false,
+              color: context.theme.colorScheme.background.withOpacity(0.5),
+            ),
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
           ],
-        ),
-      );
+        ],
+      ),
+    );
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -115,7 +115,8 @@ class CreateTaskPage extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
-                    icon: const Icon(Icons.watch_later_outlined),
+                    icon: const Icon(Icons.event),
+                    // icon: const Icon(Icons.event_repeat),
                     label: Text(
                       context.strings.taskDueDescription(currentDueDate.value),
                     ),
