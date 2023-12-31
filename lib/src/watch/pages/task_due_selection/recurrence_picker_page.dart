@@ -13,28 +13,36 @@ import '../../widgets/watch_dialog.dart';
 class RecurrencePickerPage extends HookConsumerWidget {
   final TaskRecurrence? initialRecurrence;
 
-  const RecurrencePickerPage({
+  late final _initialScrollOffset = 42.0 *
+      max(
+        0,
+        (initialRecurrence?.frequency.index ??
+                RecurrenceFrequency.daily.index) -
+            1,
+      );
+
+  RecurrencePickerPage({
     super.key,
     required this.initialRecurrence,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final initialScrollOffset = 42.0 *
-        max(
-          0,
-          (initialRecurrence?.frequency.index ??
-                  RecurrenceFrequency.daily.index) -
-              1,
-        );
     final frequencyController = useScrollController(
-      initialScrollOffset: initialScrollOffset,
+      initialScrollOffset: _initialScrollOffset,
     );
     final selectedFrequency = useState(initialRecurrence?.frequency);
 
-    return WatchDialog<TaskRecurrence?>(
+    final pageValidations = useMemoized(
+      () => [
+        selectedFrequency.value != null,
+        false,
+      ],
+      [selectedFrequency.value],
+    );
+
+    return WatchDialog<TaskRecurrence?>.paged(
       horizontalSafeArea: true,
-      canAccept: selectedFrequency.value != null,
       onReject: () => initialRecurrence,
       onAccept: () => selectedFrequency.value != null
           ? TaskRecurrence(
@@ -50,23 +58,27 @@ class RecurrencePickerPage extends HookConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: ListView(
-        controller: frequencyController,
-        children: [
-          for (final frequency in RecurrenceFrequency.values)
-            RadioListTile<RecurrenceFrequency>(
-              toggleable: true,
-              title: Text(
-                context.strings.recurrence_selection_page_frequency(
-                  frequency.name,
+      pageValidations: pageValidations,
+      pages: [
+        ListView(
+          controller: frequencyController,
+          children: [
+            for (final frequency in RecurrenceFrequency.values)
+              RadioListTile<RecurrenceFrequency>(
+                toggleable: true,
+                title: Text(
+                  context.strings.recurrence_selection_page_frequency(
+                    frequency.name,
+                  ),
                 ),
+                value: frequency,
+                groupValue: selectedFrequency.value,
+                onChanged: (value) => selectedFrequency.value = value,
               ),
-              value: frequency,
-              groupValue: selectedFrequency.value,
-              onChanged: (value) => selectedFrequency.value = value,
-            ),
-        ],
-      ),
+          ],
+        ),
+        const Placeholder(),
+      ],
     );
   }
 
