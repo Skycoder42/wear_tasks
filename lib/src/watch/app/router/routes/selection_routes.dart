@@ -1,13 +1,6 @@
 part of '../watch_router.dart';
 
-@TypedGoRoute<DateTimeSelectionRoute>(
-  path: '/select/task-due',
-  routes: [
-    TypedGoRoute<TimePickerRoute>(path: 'time'),
-    TypedGoRoute<DatePickerRoute>(path: 'date'),
-    TypedGoRoute<RecurrenceSelectionRoute>(path: '/recurrence'),
-  ],
-)
+@TypedGoRoute<DateTimeSelectionRoute>(path: '/select/task-due')
 @immutable
 class DateTimeSelectionRoute extends GoRouteData {
   final DateTime $extra;
@@ -19,6 +12,7 @@ class DateTimeSelectionRoute extends GoRouteData {
       TaskDueSelectionPage(initialDateTime: $extra);
 }
 
+@TypedGoRoute<TimePickerRoute>(path: '/select/time')
 @immutable
 class TimePickerRoute extends GoRouteData {
   final DateTime $extra;
@@ -30,6 +24,7 @@ class TimePickerRoute extends GoRouteData {
       TimePickerPage(initialTime: $extra);
 }
 
+@TypedGoRoute<DatePickerRoute>(path: '/select/date')
 @immutable
 class DatePickerRoute extends GoRouteData {
   final DateTime $extra;
@@ -41,6 +36,7 @@ class DatePickerRoute extends GoRouteData {
       DatePickerPage(initialDate: $extra);
 }
 
+@TypedGoRoute<RecurrenceSelectionRoute>(path: '/select/recurrence')
 @immutable
 class RecurrenceSelectionRoute extends GoRouteData {
   final TaskRecurrence? $extra;

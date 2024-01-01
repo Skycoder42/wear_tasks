@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -7,8 +9,8 @@ import 'watch_scaffold.dart';
 
 typedef ValueCallback<T> = T Function();
 
-class WatchDialog<T> extends StatelessWidget {
-  static const _animationDuration = Duration(milliseconds: 500);
+class WatchDialog<T> extends HookWidget {
+  static const _animationDuration = Duration(milliseconds: 2500);
   static const _animationCurve = Curves.easeInOut;
 
   final bool horizontalSafeArea;
@@ -47,51 +49,19 @@ class WatchDialog<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final pageController = usePageController();
     final activePage = useState(0);
-    final isFirstPage = activePage.value == 0;
-    final isLastPage = activePage.value == pages.length - 1;
-    final isPageValid = pageValidations?[activePage.value] ?? true;
 
     return WatchScaffold(
       horizontalSafeArea: horizontalSafeArea,
-      leftAction: Padding(
-        padding: const EdgeInsets.all(4),
-        child: SideButton(
-          icon: isFirstPage
-              ? const Icon(Icons.close)
-              : const Icon(Icons.chevron_left),
-          onPressed: () async {
-            if (isFirstPage) {
-              Navigator.pop(context, onReject?.call());
-            } else {
-              await pageController.previousPage(
-                duration: _animationDuration,
-                curve: _animationCurve,
-              );
-            }
-          },
-        ),
-      ),
-      rightAction: Padding(
-        padding: const EdgeInsets.all(4),
-        child: SideButton(
-          filled: isLastPage,
-          icon: isLastPage
-              ? const Icon(Icons.check)
-              : const Icon(Icons.chevron_right),
-          onPressed: isPageValid
-              ? () async {
-                  if (isLastPage) {
-                    Navigator.pop(context, onAccept());
-                  } else {
-                    await pageController.nextPage(
-                      duration: _animationDuration,
-                      curve: _animationCurve,
-                    );
-                  }
-                }
-              : null,
-        ),
-      ),
+      leftAction: _buildButtonStack(pageController, [
+        _buildRejectButton(context),
+        for (var i = 0; i < pages.length - 1; ++i)
+          _buildPrevButton(pageController),
+      ]),
+      rightAction: _buildButtonStack(pageController, [
+        for (var i = 0; i < pages.length - 1; ++i)
+          _buildNextButton(pageController, pageValidations?[i] ?? true),
+        _buildAcceptButton(context, pageValidations?.last ?? true),
+      ]),
       bottomAction: bottomAction,
       body: PageView(
         controller: pageController,
@@ -101,6 +71,59 @@ class WatchDialog<T> extends StatelessWidget {
       ),
     );
   }
+
+  SideButton _buildAcceptButton(BuildContext context, bool isPageValid) =>
+      SideButton(
+        filled: true,
+        icon: const Icon(Icons.check),
+        onPressed:
+            isPageValid ? () => Navigator.pop(context, onAccept()) : null,
+      );
+
+  SideButton _buildRejectButton(BuildContext context) => SideButton(
+        icon: const Icon(Icons.close),
+        onPressed: () => Navigator.pop(context, onReject?.call()),
+      );
+
+  Widget _buildNextButton(PageController pageController, bool isPageValid) =>
+      SideButton(
+        icon: const Icon(Icons.chevron_right),
+        onPressed: isPageValid
+            ? () async => pageController.nextPage(
+                  duration: _animationDuration,
+                  curve: _animationCurve,
+                )
+            : null,
+      );
+
+  Widget _buildPrevButton(PageController pageController) => SideButton(
+        icon: const Icon(Icons.chevron_left),
+        onPressed: () async => pageController.previousPage(
+          duration: _animationDuration,
+          curve: _animationCurve,
+        ),
+      );
+
+  Widget _buildButtonStack(PageController controller, List<Widget> widgets) =>
+      Padding(
+        padding: const EdgeInsets.all(4),
+        child: ListenableBuilder(
+          listenable: controller,
+          builder: (context, _) => Stack(
+            children: [
+              for (final (index, widget) in widgets.indexed)
+                Offstage(
+                  offstage: (index - (controller.page ?? 0.0)).abs() >= 1,
+                  child: Opacity(
+                    opacity:
+                        1 - min((index - (controller.page ?? 0.0)).abs(), 1.0),
+                    child: widget,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
