@@ -10,13 +10,13 @@ import 'watch_scaffold.dart';
 typedef ValueCallback<T> = T Function();
 
 class WatchDialog<T> extends HookWidget {
-  static const _animationDuration = Duration(milliseconds: 250);
-  static const _animationCurve = Curves.easeInOut;
+  static const animationDuration = Duration(milliseconds: 250);
+  static const animationCurve = Curves.easeInOut;
 
   final bool horizontalSafeArea;
   final ValueCallback<T?>? onReject;
   final ValueCallback<T> onAccept;
-  final Widget? bottomAction;
+  final IndexedWidgetBuilder? bottomActionBuilder;
   final List<Widget> pages;
   final List<bool>? pageValidations;
 
@@ -28,17 +28,18 @@ class WatchDialog<T> extends HookWidget {
     bool canAccept = true,
     required this.onAccept,
     this.onReject,
-    this.bottomAction,
+    Widget? bottomAction,
     required Widget body,
   })  : pages = [body],
-        pageValidations = [canAccept];
+        pageValidations = [canAccept],
+        bottomActionBuilder = _singleBottomActionBuilder(bottomAction);
 
   WatchDialog.paged({
     super.key,
     this.horizontalSafeArea = false,
     required this.onAccept,
     this.onReject,
-    this.bottomAction,
+    this.bottomActionBuilder,
     required this.pages,
     this.pageValidations,
   })  : assert(pages.isNotEmpty, 'pages must not be empty'),
@@ -57,8 +58,8 @@ class WatchDialog<T> extends HookWidget {
       onPopInvoked: (didPop) async {
         if (!didPop) {
           await pageController.previousPage(
-            duration: _animationDuration,
-            curve: _animationCurve,
+            duration: animationDuration,
+            curve: animationCurve,
           );
         }
       },
@@ -74,7 +75,13 @@ class WatchDialog<T> extends HookWidget {
             _buildNextButton(pageController, pageValidations?[i] ?? true),
           _buildAcceptButton(context, pageValidations?.last ?? true),
         ]),
-        bottomAction: bottomAction,
+        bottomAction: bottomActionBuilder != null
+            ? ValueListenableBuilder(
+                valueListenable: activePage,
+                builder: (context, page, _) =>
+                    bottomActionBuilder!(context, page),
+              )
+            : null,
         body: _isSinglePage
             ? pages.single
             : PageView(
@@ -105,8 +112,8 @@ class WatchDialog<T> extends HookWidget {
         icon: const Icon(Icons.chevron_right),
         onPressed: isPageValid
             ? () async => pageController.nextPage(
-                  duration: _animationDuration,
-                  curve: _animationCurve,
+                  duration: animationDuration,
+                  curve: animationCurve,
                 )
             : null,
       );
@@ -114,8 +121,8 @@ class WatchDialog<T> extends HookWidget {
   Widget _buildPrevButton(PageController pageController) => SideButton(
         icon: const Icon(Icons.chevron_left),
         onPressed: () async => pageController.previousPage(
-          duration: _animationDuration,
-          curve: _animationCurve,
+          duration: animationDuration,
+          curve: animationCurve,
         ),
       );
 
@@ -154,6 +161,15 @@ class WatchDialog<T> extends HookWidget {
       ..add(
         DiagnosticsProperty<bool>('horizontalSafeArea', horizontalSafeArea),
       )
-      ..add(IterableProperty<bool>('pageValidations', pageValidations));
+      ..add(IterableProperty<bool>('pageValidations', pageValidations))
+      ..add(
+        ObjectFlagProperty<IndexedWidgetBuilder?>.has(
+          'bottomActionBuilder',
+          bottomActionBuilder,
+        ),
+      );
   }
+
+  static IndexedWidgetBuilder? _singleBottomActionBuilder(Widget? widget) =>
+      widget != null ? (_, __) => widget : null;
 }

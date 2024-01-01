@@ -7,8 +7,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../common/localization/localization.dart';
+import '../../app/router/watch_router.dart';
 import '../../app/watch_theme.dart';
 import '../../models/task_recurrence.dart';
+import '../../widgets/side_button.dart';
 import '../../widgets/watch_dialog.dart';
 
 class RecurrencePickerPage extends HookConsumerWidget {
@@ -43,14 +45,29 @@ class RecurrencePickerPage extends HookConsumerWidget {
 
     final selectedFrequency = useState(initialRecurrence?.frequency);
     final selectedInterval = useState(initialRecurrence?.interval ?? 1);
-    final selectedCount = useState(initialRecurrence?.count ?? 0);
+    final selectedEndMode = useState(
+      initialRecurrence?.endMode ?? RecurrenceEndMode.infinite,
+    );
+    final selectedCount = useState(initialRecurrence?.count ?? 1);
+    final selectedEndDate = useState<DateTime?>(initialRecurrence?.endDate);
 
     final pageValidations = useMemoized(
       () => [
         selectedFrequency.value != null,
-        selectedInterval.value >= 1 && (selectedCount.value >= 0),
+        selectedInterval.value >= 1 &&
+            switch (selectedEndMode.value) {
+              RecurrenceEndMode.infinite => true,
+              RecurrenceEndMode.count => selectedCount.value >= 1,
+              RecurrenceEndMode.endDate => selectedEndDate.value != null,
+            },
       ],
-      [selectedFrequency.value, selectedInterval.value, selectedCount.value],
+      [
+        selectedFrequency.value,
+        selectedInterval.value,
+        selectedEndMode.value,
+        selectedCount.value,
+        selectedEndDate.value,
+      ],
     );
 
     return WatchDialog<TaskRecurrence?>.paged(
@@ -60,10 +77,15 @@ class RecurrencePickerPage extends HookConsumerWidget {
           ? TaskRecurrence(
               frequency: selectedFrequency.value!,
               interval: selectedInterval.value,
-              count: selectedCount.value == 0 ? null : selectedCount.value,
+              count: selectedEndMode.value == RecurrenceEndMode.count
+                  ? selectedCount.value
+                  : null,
+              endDate: selectedEndMode.value == RecurrenceEndMode.endDate
+                  ? selectedEndDate.value
+                  : null,
             )
           : null,
-      bottomAction: Theme(
+      bottomActionBuilder: (context, page) => Theme(
         data: ref.watch(
           watchThemeProvider(context.theme.colorScheme.error),
         ),
@@ -104,22 +126,69 @@ class RecurrencePickerPage extends HookConsumerWidget {
                 ),
               ),
             ),
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-              onTap: countFocus.requestFocus,
+            RadioListTile(
+              value: RecurrenceEndMode.infinite,
+              groupValue: selectedEndMode.value,
+              onChanged: (value) => selectedEndMode.value = value!,
               title: Text(
-                textAlign: TextAlign.center,
-                context.strings.recurrence_selection_page_count(
+                context.strings.recurrence_selection_page_end_infinite,
+              ),
+            ),
+            RadioListTile(
+              value: RecurrenceEndMode.count,
+              groupValue: selectedEndMode.value,
+              onChanged: (value) {
+                countFocus.requestFocus();
+                selectedEndMode.value = value!;
+              },
+              title: Text(
+                context.strings.recurrence_selection_page_end_count(
                   selectedCount.value,
                 ),
               ),
+              secondary: AnimatedOpacity(
+                opacity:
+                    selectedEndMode.value == RecurrenceEndMode.count ? 1 : 0,
+                duration: WatchDialog.animationDuration,
+                curve: WatchDialog.animationCurve,
+                child: SideButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: countFocus.requestFocus,
+                ),
+              ),
             ),
-            ListTile(
-              title: const Center(child: Icon(Icons.settings_backup_restore)),
-              onTap: () {
-                selectedInterval.value = 1;
-                selectedCount.value = 0;
+            RadioListTile(
+              value: RecurrenceEndMode.endDate,
+              groupValue: selectedEndMode.value,
+              onChanged: (value) async {
+                final endDateTime = await DateTimePickerRoute(
+                  selectedEndDate.value ?? DateTime.now(),
+                ).push<DateTime>(context);
+                if (endDateTime != null) {
+                  selectedEndDate.value = endDateTime;
+                  selectedEndMode.value = value!;
+                }
               },
+              title: Text(
+                context.strings.taskEndDescription(selectedEndDate.value),
+              ),
+              secondary: AnimatedOpacity(
+                opacity:
+                    selectedEndMode.value == RecurrenceEndMode.endDate ? 1 : 0,
+                duration: WatchDialog.animationDuration,
+                curve: WatchDialog.animationCurve,
+                child: SideButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () async {
+                    final endDateTime = await DateTimePickerRoute(
+                      selectedEndDate.value ?? DateTime.now(),
+                    ).push<DateTime>(context);
+                    if (endDateTime != null) {
+                      selectedEndDate.value = endDateTime;
+                    }
+                  },
+                ),
+              ),
             ),
             Offstage(
               child: TextField(
@@ -143,11 +212,11 @@ class RecurrencePickerPage extends HookConsumerWidget {
                 keyboardType: TextInputType.number,
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(
-                    RegExp('^[0-9]*'),
+                    RegExp('^[1-9][0-9]*'),
                   ),
                 ],
                 onChanged: (value) {
-                  selectedCount.value = int.tryParse(value) ?? 0;
+                  selectedCount.value = int.tryParse(value) ?? 1;
                 },
               ),
             ),

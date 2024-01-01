@@ -37,6 +37,15 @@
     }
   },
   "task_due_past": "Past",
+  "task_end_date": "{dateKind, select, timeOnly{at {date}} dateOnly{on {date}} yearOnly{in {date}} other{at …}}",
+  "@task_end_date": {
+    "placeholders": {
+      "dateKind": {},
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "default_collection_name": "Default tasks",
   "default_collection_description": "Created by {appName} (Version {version})",
   "@default_collection_description": {
@@ -117,8 +126,9 @@
       "frequency": {}
     }
   },
-  "recurrence_selection_page_count": "{count, plural, zero{without end} one{once} two{twice} other{{count} times}}",
-  "@recurrence_selection_page_count": {
+  "recurrence_selection_page_end_infinite": "without end",
+  "recurrence_selection_page_end_count": "{count, plural, one{once} two{twice} other{{count} times}}",
+  "@recurrence_selection_page_end_count": {
     "placeholders": {
       "count": {
         "type": "int"

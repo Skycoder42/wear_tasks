@@ -8,6 +8,7 @@ import '../../app/router/watch_router.dart';
 import '../../app/watch_theme.dart';
 import '../../models/task_recurrence.dart';
 import '../../widgets/watch_dialog.dart';
+import '../date_time_picker/date_time_picker_page.dart';
 
 class TaskDueSelectionPage extends HookConsumerWidget {
   final DateTime initialDateTime;
@@ -35,8 +36,10 @@ class TaskDueSelectionPage extends HookConsumerWidget {
               icon: const Icon(Icons.watch_later),
               label: Text(context.strings.task_due_time(currentDateTime.value)),
               onPressed: () async {
-                final newTime = await TimePickerRoute(currentDateTime.value)
-                    .push<TimeOfDay>(context);
+                final newTime = await DateTimePickerRoute(
+                  mode: DateTimePickerMode.timeOnly,
+                  currentDateTime.value,
+                ).push<DateTime>(context);
                 if (newTime != null) {
                   currentDateTime.value = currentDateTime.value.copyWith(
                     hour: newTime.hour,
@@ -54,8 +57,10 @@ class TaskDueSelectionPage extends HookConsumerWidget {
                 context.strings.task_due_date_full(currentDateTime.value),
               ),
               onPressed: () async {
-                final newDate = await DatePickerRoute(currentDateTime.value)
-                    .push<DateTime>(context);
+                final newDate = await DateTimePickerRoute(
+                  mode: DateTimePickerMode.dateOnly,
+                  currentDateTime.value,
+                ).push<DateTime>(context);
                 if (newDate != null) {
                   currentDateTime.value = currentDateTime.value.copyWith(
                     year: newDate.year,
