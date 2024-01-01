@@ -10,7 +10,7 @@ import 'watch_scaffold.dart';
 typedef ValueCallback<T> = T Function();
 
 class WatchDialog<T> extends HookWidget {
-  static const _animationDuration = Duration(milliseconds: 2500);
+  static const _animationDuration = Duration(milliseconds: 250);
   static const _animationCurve = Curves.easeInOut;
 
   final bool horizontalSafeArea;
@@ -19,6 +19,8 @@ class WatchDialog<T> extends HookWidget {
   final Widget? bottomAction;
   final List<Widget> pages;
   final List<bool>? pageValidations;
+
+  bool get _isSinglePage => pages.length == 1;
 
   WatchDialog({
     super.key,
@@ -50,24 +52,37 @@ class WatchDialog<T> extends HookWidget {
     final pageController = usePageController();
     final activePage = useState(0);
 
-    return WatchScaffold(
-      horizontalSafeArea: horizontalSafeArea,
-      leftAction: _buildButtonStack(pageController, [
-        _buildRejectButton(context),
-        for (var i = 0; i < pages.length - 1; ++i)
-          _buildPrevButton(pageController),
-      ]),
-      rightAction: _buildButtonStack(pageController, [
-        for (var i = 0; i < pages.length - 1; ++i)
-          _buildNextButton(pageController, pageValidations?[i] ?? true),
-        _buildAcceptButton(context, pageValidations?.last ?? true),
-      ]),
-      bottomAction: bottomAction,
-      body: PageView(
-        controller: pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (value) => activePage.value = value,
-        children: pages,
+    return PopScope(
+      canPop: activePage.value == 0,
+      onPopInvoked: (didPop) async {
+        if (!didPop) {
+          await pageController.previousPage(
+            duration: _animationDuration,
+            curve: _animationCurve,
+          );
+        }
+      },
+      child: WatchScaffold(
+        horizontalSafeArea: horizontalSafeArea,
+        leftAction: _buildButtonStack(pageController, [
+          _buildRejectButton(context),
+          for (var i = 1; i < pages.length; ++i)
+            _buildPrevButton(pageController),
+        ]),
+        rightAction: _buildButtonStack(pageController, [
+          for (var i = 0; i < pages.length - 1; ++i)
+            _buildNextButton(pageController, pageValidations?[i] ?? true),
+          _buildAcceptButton(context, pageValidations?.last ?? true),
+        ]),
+        bottomAction: bottomAction,
+        body: _isSinglePage
+            ? pages.single
+            : PageView(
+                controller: pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                onPageChanged: (value) => activePage.value = value,
+                children: pages,
+              ),
       ),
     );
   }
@@ -107,22 +122,27 @@ class WatchDialog<T> extends HookWidget {
   Widget _buildButtonStack(PageController controller, List<Widget> widgets) =>
       Padding(
         padding: const EdgeInsets.all(4),
-        child: ListenableBuilder(
-          listenable: controller,
-          builder: (context, _) => Stack(
-            children: [
-              for (final (index, widget) in widgets.indexed)
-                Offstage(
-                  offstage: (index - (controller.page ?? 0.0)).abs() >= 1,
-                  child: Opacity(
-                    opacity:
-                        1 - min((index - (controller.page ?? 0.0)).abs(), 1.0),
-                    child: widget,
-                  ),
+        child: _isSinglePage
+            ? widgets.single
+            : ListenableBuilder(
+                listenable: controller,
+                builder: (context, _) => Stack(
+                  children: [
+                    for (final (index, widget) in widgets.indexed)
+                      Offstage(
+                        offstage: (index - (controller.page ?? 0.0)).abs() >= 1,
+                        child: Opacity(
+                          opacity: 1 -
+                              min(
+                                (index - (controller.page ?? 0.0)).abs(),
+                                1.0,
+                              ),
+                          child: widget,
+                        ),
+                      ),
+                  ],
                 ),
-            ],
-          ),
-        ),
+              ),
       );
 
   @override

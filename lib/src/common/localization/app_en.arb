@@ -108,6 +108,23 @@
       "frequency": {}
     }
   },
+  "recurrence_selection_page_interval": "Every {frequency, select, secondly{{interval, plural, one{second} other{{interval} seconds}}} minutely{{interval, plural, one{minute} other{{interval} minutes}}} hourly{{interval, plural, one{hour} other{{interval} hours}}} daily{{interval, plural, one{day} other{{interval} days}}} weekly{{interval, plural, one{week} other{{interval} weeks}}} monthly{{interval, plural, one{month} other{{interval} months}}} yearly{{interval, plural, one{year} other{{interval} years}}} other{{interval} {frequency}}}",
+  "@recurrence_selection_page_interval": {
+    "placeholders": {
+      "interval": {
+        "type": "int"
+      },
+      "frequency": {}
+    }
+  },
+  "recurrence_selection_page_count": "{count, plural, zero{without end} one{once} two{twice} other{{count} times}}",
+  "@recurrence_selection_page_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "validator_not_empty": "Must not be empty",
   "validator_https_url": "Must be a valid HTTPS url",
   "create_task_page_success_message": "Task created!",
