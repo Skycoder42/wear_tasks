@@ -3,13 +3,22 @@ part of '../watch_router.dart';
 @TypedGoRoute<DateTimeSelectionRoute>(path: '/select/task-due')
 @immutable
 class DateTimeSelectionRoute extends GoRouteData {
-  final DateTime $extra;
+  final (DateTime, TaskRecurrence?) $extra;
 
   const DateTimeSelectionRoute(this.$extra);
 
+  factory DateTimeSelectionRoute.from(
+    DateTime dateTime, [
+    TaskRecurrence? recurrence,
+  ]) =>
+      DateTimeSelectionRoute((dateTime, recurrence));
+
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      TaskDueSelectionPage(initialDateTime: $extra);
+      TaskDueSelectionPage(
+        initialDateTime: $extra.$1,
+        initialRecurrence: $extra.$2,
+      );
 }
 
 @TypedGoRoute<RecurrenceSelectionRoute>(path: '/select/recurrence')

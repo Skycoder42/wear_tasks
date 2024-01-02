@@ -11,9 +11,7 @@ class DateTimeController extends _$DateTimeController {
   static const minuteInterval = 5;
 
   @override
-  DateTime build() => _toIntervalTime(DateTime.now());
-
-  void initialize(DateTime dateTime) => state = _toIntervalTime(dateTime);
+  DateTime build(DateTime dateTime) => _toIntervalTime(dateTime);
 
   DateTime updateYear(int year) => _updateDate(year: year);
 

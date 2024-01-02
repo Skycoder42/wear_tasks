@@ -12,10 +12,12 @@ import '../date_time_picker/date_time_picker_page.dart';
 
 class TaskDueSelectionPage extends HookConsumerWidget {
   final DateTime initialDateTime;
+  final TaskRecurrence? initialRecurrence;
 
   const TaskDueSelectionPage({
     super.key,
     required this.initialDateTime,
+    required this.initialRecurrence,
   });
 
   @override
@@ -23,11 +25,11 @@ class TaskDueSelectionPage extends HookConsumerWidget {
     final currentDateTime = useState(
       initialDateTime.copyWith(second: 0, millisecond: 0, microsecond: 0),
     );
-    final currentRecurrence = useState<TaskRecurrence?>(null);
+    final currentRecurrence = useState<TaskRecurrence?>(initialRecurrence);
 
-    return WatchDialog<DateTime>(
+    return WatchDialog<(DateTime, TaskRecurrence?)>(
       horizontalSafeArea: true,
-      onAccept: () => currentDateTime.value,
+      onAccept: () => (currentDateTime.value, currentRecurrence.value),
       body: ListView(
         children: [
           const SizedBox(width: double.infinity),
@@ -101,5 +103,7 @@ class TaskDueSelectionPage extends HookConsumerWidget {
     super.debugFillProperties(properties);
     properties
         .add(DiagnosticsProperty<DateTime>('initialDateTime', initialDateTime));
+    properties.add(DiagnosticsProperty<TaskRecurrence?>(
+        'initialRecurrence', initialRecurrence));
   }
 }

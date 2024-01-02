@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -6,18 +7,23 @@ import '../../../common/extensions/core_extensions.dart';
 import 'date_time_controller.dart';
 
 class TimePicker extends HookConsumerWidget {
-  const TimePicker({super.key});
+  final DateTime initialDateTime;
+
+  DateTimeControllerProvider get _controllerProvider =>
+      dateTimeControllerProvider(initialDateTime);
+
+  const TimePicker(this.initialDateTime, {super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dateTimeController = ref.watch(dateTimeControllerProvider.notifier);
-    final initialTime = ref.read(dateTimeControllerProvider).time;
+    final dateTimeController = ref.watch(_controllerProvider.notifier);
+    final initialTime = ref.read(_controllerProvider).time;
 
     final pickerKey = useState(GlobalKey());
     final currentTime = useState(initialTime);
 
     ref.listen(
-      dateTimeControllerProvider.select((v) => v.time),
+      _controllerProvider.select((v) => v.time),
       (_, time) {
         if (time != currentTime.value) {
           currentTime.value = time;
@@ -31,7 +37,7 @@ class TimePicker extends HookConsumerWidget {
         key: pickerKey.value,
         mode: CupertinoDatePickerMode.time,
         use24hFormat: true,
-        minuteInterval: 5,
+        minuteInterval: DateTimeController.minuteInterval,
         initialDateTime: initialTime,
         onDateTimeChanged: (value) {
           currentTime.value = value;
@@ -39,5 +45,12 @@ class TimePicker extends HookConsumerWidget {
         },
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+        .add(DiagnosticsProperty<DateTime>('initialDateTime', initialDateTime));
   }
 }

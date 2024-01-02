@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../widgets/side_button.dart';
@@ -24,6 +23,9 @@ class DateTimePickerPage extends HookConsumerWidget {
   final DateTime initialDateTime;
   final DateTimePickerMode mode;
 
+  DateTimeControllerProvider get _controllerProvider =>
+      dateTimeControllerProvider(initialDateTime);
+
   const DateTimePickerPage({
     super.key,
     required this.initialDateTime,
@@ -32,17 +34,7 @@ class DateTimePickerPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dateTimeController = ref.watch(dateTimeControllerProvider.notifier);
-
-    useEffect(
-      () {
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) => dateTimeController.initialize(initialDateTime),
-        );
-        return null;
-      },
-      const [],
-    );
+    final dateTimeController = ref.watch(_controllerProvider.notifier);
 
     return WatchDialog<DateTime>.paged(
       horizontalSafeArea: true,
@@ -61,10 +53,10 @@ class DateTimePickerPage extends HookConsumerWidget {
           },
         ),
       ),
-      onAccept: () => ref.read(dateTimeControllerProvider),
+      onAccept: () => ref.read(_controllerProvider),
       pages: [
-        if (mode.hasDate) const DatePicker(),
-        if (mode.hasTime) const TimePicker(),
+        if (mode.hasDate) DatePicker(initialDateTime),
+        if (mode.hasTime) TimePicker(initialDateTime),
       ],
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../common/extensions/core_extensions.dart';
@@ -7,12 +8,17 @@ import '../../widgets/hooks/fixed_extent_scroll_controller_hook.dart';
 import 'date_time_controller.dart';
 
 class DatePicker extends HookConsumerWidget {
-  const DatePicker({super.key});
+  final DateTime initialDateTime;
+
+  DateTimeControllerProvider get _controllerProvider =>
+      dateTimeControllerProvider(initialDateTime);
+
+  const DatePicker(this.initialDateTime, {super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dateTimeController = ref.watch(dateTimeControllerProvider.notifier);
-    final initialDateTime = ref.read(dateTimeControllerProvider);
+    final dateTimeController = ref.watch(_controllerProvider.notifier);
+    final initialDateTime = ref.read(_controllerProvider);
 
     final dayController = useFixedExtentScrollController(
       initialIndex: initialDateTime.day - 1,
@@ -26,22 +32,17 @@ class DatePicker extends HookConsumerWidget {
 
     ref
       ..listen(
-        dateTimeControllerProvider.select((d) => d.day - 1),
+        _controllerProvider.select((d) => d.day - 1),
         (_, dayIndex) => _syncController(dayController, dayIndex),
       )
       ..listen(
-        dateTimeControllerProvider.select((d) => d.month - 1),
+        _controllerProvider.select((d) => d.month - 1),
         (_, monthIndex) => _syncController(monthController, monthIndex),
       )
       ..listen(
-        dateTimeControllerProvider.select((d) => d.year),
+        _controllerProvider.select((d) => d.year),
         (_, yearIndex) => _syncController(yearController, yearIndex),
       );
-
-    // TODO this is sluggish!
-    final daysInMonth = ref.watch(
-      dateTimeControllerProvider.select((d) => d.daysInMonth),
-    );
 
     return SafeArea(
       child: Stack(
@@ -51,25 +52,32 @@ class DatePicker extends HookConsumerWidget {
             children: [
               Flexible(
                 flex: 2,
-                child: CupertinoPicker(
-                  looping: true,
-                  itemExtent: 32,
-                  selectionOverlay: null,
-                  scrollController: dayController,
-                  onSelectedItemChanged: (dayIndex) =>
-                      dateTimeController.updateDay(dayIndex + 1),
-                  children: [
-                    for (var day = 1; day <= daysInMonth; ++day)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            context.strings
-                                .date_picker_day(DateTime(0, 1, day)),
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final daysInMonth = ref.watch(
+                      _controllerProvider.select((d) => d.daysInMonth),
+                    );
+                    return CupertinoPicker(
+                      looping: true,
+                      itemExtent: 32,
+                      selectionOverlay: null,
+                      scrollController: dayController,
+                      onSelectedItemChanged: (dayIndex) =>
+                          dateTimeController.updateDay(dayIndex + 1),
+                      children: [
+                        for (var day = 1; day <= daysInMonth; ++day)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                context.strings
+                                    .date_picker_day(DateTime(0, 1, day)),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                  ],
+                      ],
+                    );
+                  },
                 ),
               ),
               Flexible(
@@ -97,21 +105,18 @@ class DatePicker extends HookConsumerWidget {
               ),
               Flexible(
                 flex: 3,
-                child: CupertinoPicker(
+                child: CupertinoPicker.builder(
                   itemExtent: 32,
                   selectionOverlay: null,
                   scrollController: yearController,
                   onSelectedItemChanged: dateTimeController.updateYear,
-                  children: [
-                    for (var year = 0; year < 10000; ++year)
-                      Row(
-                        children: [
-                          Text(
-                            context.strings.date_picker_year(DateTime(year)),
-                          ),
-                        ],
+                  itemBuilder: (context, index) => Row(
+                    children: [
+                      Text(
+                        context.strings.date_picker_year(DateTime(index)),
                       ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -145,5 +150,12 @@ class DatePicker extends HookConsumerWidget {
         controller.jumpToItem(index);
       });
     }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+        .add(DiagnosticsProperty<DateTime>('initialDateTime', initialDateTime));
   }
 }

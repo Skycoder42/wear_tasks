@@ -10,6 +10,7 @@ import '../../../common/widgets/error_snack_bar.dart';
 import '../../../common/widgets/success_snack_bar.dart';
 import '../../app/router/watch_router.dart';
 import '../../models/task.dart';
+import '../../models/task_recurrence.dart';
 import '../../widgets/submit_form.dart';
 import '../../widgets/watch_scaffold.dart';
 import 'active_collection.dart';
@@ -33,6 +34,7 @@ class CreateTaskPage extends HookConsumerWidget {
       return DateTime(now.year, now.month, now.day + 1, 9);
     });
     final currentDueDate = useState(initialDueDate);
+    final currentRecurrence = useState<TaskRecurrence?>(null);
     final currentPriority = useState(TaskPriority.none);
 
     final collectionInfos = ref.watch(collectionInfosProvider);
@@ -71,6 +73,8 @@ class CreateTaskPage extends HookConsumerWidget {
         ref,
         activeCollection.requireValue,
         result[_summaryKey] as String,
+        currentDueDate.value,
+        currentRecurrence.value,
         currentPriority.value,
         result[_descriptionKey] as String?,
       ),
@@ -115,17 +119,20 @@ class CreateTaskPage extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
-                    icon: const Icon(Icons.event),
-                    // icon: const Icon(Icons.event_repeat),
+                    icon: currentRecurrence.value != null
+                        ? const Icon(Icons.event_repeat)
+                        : const Icon(Icons.event),
                     label: Text(
                       context.strings.taskDueDescription(currentDueDate.value),
                     ),
                     onPressed: () async {
-                      final newDueDate =
-                          await DateTimeSelectionRoute(currentDueDate.value)
-                              .push<DateTime>(context);
-                      if (newDueDate != null) {
-                        currentDueDate.value = newDueDate;
+                      final result = await DateTimeSelectionRoute.from(
+                        currentDueDate.value,
+                        currentRecurrence.value,
+                      ).push<(DateTime, TaskRecurrence?)>(context);
+                      if (result case (final dateTime, final recurrence)) {
+                        currentDueDate.value = dateTime;
+                        currentRecurrence.value = recurrence;
                       }
                     },
                   ),
@@ -153,13 +160,16 @@ class CreateTaskPage extends HookConsumerWidget {
     WidgetRef ref,
     String collectionUid,
     String summary,
+    DateTime dueDate,
+    TaskRecurrence? recurrence,
     TaskPriority priority,
     String? description,
   ) async {
     final task = Task(
       collectionUid: collectionUid,
       taskUid: ref.read(uuidProvider).v4(),
-      createdAt: DateTime.now(),
+      createdAt: dueDate,
+      recurrence: recurrence,
       summary: summary,
       priority: priority,
       description: (description?.isEmpty ?? true) ? null : description,
