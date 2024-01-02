@@ -1,37 +1,29 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class TimePicker extends HookWidget {
-  static const _minuteInterval = 5;
+import '../../../common/extensions/core_extensions.dart';
+import 'date_time_controller.dart';
 
-  static DateTime toIntervalTime(DateTime dateTime) => dateTime.copyWith(
-        minute: (dateTime.minute / _minuteInterval).round() * _minuteInterval,
-      );
-
-  final ValueNotifier<DateTime> dateTime;
-
-  const TimePicker(
-    this.dateTime, {
-    super.key,
-  });
+class TimePicker extends HookConsumerWidget {
+  const TimePicker({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final initialIntervalTime = useValueListenable(dateTime);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dateTimeController = ref.watch(dateTimeControllerProvider.notifier);
+    final initialTime = ref.read(dateTimeControllerProvider).time;
 
     final pickerKey = useState(GlobalKey());
-    final currentDateTime = useState(initialIntervalTime);
+    final currentTime = useState(initialTime);
 
-    useEffect(
-      () {
-        if (initialIntervalTime != currentDateTime.value) {
-          currentDateTime.value = initialIntervalTime;
+    ref.listen(
+      dateTimeControllerProvider.select((v) => v.time),
+      (_, time) {
+        if (time != currentTime.value) {
+          currentTime.value = time;
           pickerKey.value = GlobalKey();
         }
-        return null;
       },
-      [pickerKey, initialIntervalTime],
     );
 
     return SafeArea(
@@ -40,25 +32,12 @@ class TimePicker extends HookWidget {
         mode: CupertinoDatePickerMode.time,
         use24hFormat: true,
         minuteInterval: 5,
-        initialDateTime: initialIntervalTime,
+        initialDateTime: initialTime,
         onDateTimeChanged: (value) {
-          dateTime.value = currentDateTime.value = dateTime.value.copyWith(
-            hour: value.hour,
-            minute: value.minute,
-            second: 0,
-            millisecond: 0,
-            microsecond: 0,
-          );
+          currentTime.value = value;
+          dateTimeController.updateTime(value.hour, value.minute);
         },
       ),
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(
-      DiagnosticsProperty<ValueNotifier<DateTime>>('dateTime', dateTime),
     );
   }
 }

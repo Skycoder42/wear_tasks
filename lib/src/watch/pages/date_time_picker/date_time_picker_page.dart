@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../widgets/side_button.dart';
 import '../../widgets/watch_dialog.dart';
 import 'date_picker.dart';
+import 'date_time_controller.dart';
 import 'time_picker.dart';
 
 enum DateTimePickerMode {
@@ -18,7 +20,7 @@ enum DateTimePickerMode {
   const DateTimePickerMode(this.hasDate, this.hasTime);
 }
 
-class DateTimePickerPage extends HookWidget {
+class DateTimePickerPage extends HookConsumerWidget {
   final DateTime initialDateTime;
   final DateTimePickerMode mode;
 
@@ -29,9 +31,17 @@ class DateTimePickerPage extends HookWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final currentDateTime = useState(
-      TimePicker.toIntervalTime(initialDateTime),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dateTimeController = ref.watch(dateTimeControllerProvider.notifier);
+
+    useEffect(
+      () {
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => dateTimeController.initialize(initialDateTime),
+        );
+        return null;
+      },
+      const [],
     );
 
     return WatchDialog<DateTime>.paged(
@@ -40,27 +50,21 @@ class DateTimePickerPage extends HookWidget {
         child: SideButton(
           icon: const Icon(Icons.today),
           onPressed: () {
-            final now = TimePicker.toIntervalTime(DateTime.now());
             switch (page) {
-              case 0:
-                currentDateTime.value = currentDateTime.value.copyWith(
-                  year: now.year,
-                  month: now.month,
-                  day: now.day,
-                );
+              case 0 when mode == DateTimePickerMode.dateTime:
+              case 0 when mode == DateTimePickerMode.dateOnly:
+                dateTimeController.resetDate();
+              case 0 when mode == DateTimePickerMode.timeOnly:
               case 1:
-                currentDateTime.value = currentDateTime.value.copyWith(
-                  hour: now.hour,
-                  minute: now.minute,
-                );
+                dateTimeController.resetTime();
             }
           },
         ),
       ),
-      onAccept: () => currentDateTime.value,
+      onAccept: () => ref.read(dateTimeControllerProvider),
       pages: [
-        if (mode.hasDate) DatePicker(currentDateTime),
-        if (mode.hasTime) TimePicker(currentDateTime),
+        if (mode.hasDate) const DatePicker(),
+        if (mode.hasTime) const TimePicker(),
       ],
     );
   }

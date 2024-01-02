@@ -1,60 +1,46 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../common/extensions/core_extensions.dart';
 import '../../../common/localization/localization.dart';
 import '../../widgets/hooks/fixed_extent_scroll_controller_hook.dart';
 import 'date_time_controller.dart';
 
 class DatePicker extends HookConsumerWidget {
-  const DatePicker({
-    super.key,
-  });
+  const DatePicker({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final dateTimeController = ref.watch(dateTimeControllerProvider.notifier);
     final initialDateTime = ref.read(dateTimeControllerProvider);
 
     final dayController = useFixedExtentScrollController(
-      initialIndex: currentDateTime.day - 1,
+      initialIndex: initialDateTime.day - 1,
     );
     final monthController = useFixedExtentScrollController(
-      initialIndex: currentDateTime.month - 1,
+      initialIndex: initialDateTime.month - 1,
     );
     final yearController = useFixedExtentScrollController(
-      initialIndex: currentDateTime.year,
+      initialIndex: initialDateTime.year,
     );
 
-    useEffect(
-      () {
-        _syncController(dayController, currentDateTime.day - 1);
-        _syncController(monthController, currentDateTime.month - 1);
-        _syncController(yearController, currentDateTime.year);
-        return null;
-      },
-      [currentDateTime, dayController, monthController, yearController],
-    );
+    ref
+      ..listen(
+        dateTimeControllerProvider.select((d) => d.day - 1),
+        (_, dayIndex) => _syncController(dayController, dayIndex),
+      )
+      ..listen(
+        dateTimeControllerProvider.select((d) => d.month - 1),
+        (_, monthIndex) => _syncController(monthController, monthIndex),
+      )
+      ..listen(
+        dateTimeControllerProvider.select((d) => d.year),
+        (_, yearIndex) => _syncController(yearController, yearIndex),
+      );
 
-    final updateDateTime = useCallback(
-      // ignore: avoid_types_on_closure_parameters
-      ({int? day, int? month, int? year}) {
-        final updatedMonthYear = dateTime.value.copyWith(
-          year: year,
-          month: month,
-          day: 1,
-        );
-        final updateDate = updatedMonthYear.copyWith(
-          day: min(
-            updatedMonthYear.daysInMonth,
-            day ?? dateTime.value.day,
-          ),
-        );
-        dateTime.value = updateDate;
-      },
-      [dateTime],
+    // TODO this is sluggish!
+    final daysInMonth = ref.watch(
+      dateTimeControllerProvider.select((d) => d.daysInMonth),
     );
 
     return SafeArea(
@@ -70,9 +56,10 @@ class DatePicker extends HookConsumerWidget {
                   itemExtent: 32,
                   selectionOverlay: null,
                   scrollController: dayController,
-                  onSelectedItemChanged: (day) => updateDateTime(day: day + 1),
+                  onSelectedItemChanged: (dayIndex) =>
+                      dateTimeController.updateDay(dayIndex + 1),
                   children: [
-                    for (var day = 1; day <= currentDateTime.daysInMonth; ++day)
+                    for (var day = 1; day <= daysInMonth; ++day)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -92,8 +79,8 @@ class DatePicker extends HookConsumerWidget {
                   itemExtent: 32,
                   selectionOverlay: null,
                   scrollController: monthController,
-                  onSelectedItemChanged: (month) =>
-                      updateDateTime(month: month + 1),
+                  onSelectedItemChanged: (monthIndex) =>
+                      dateTimeController.updateMonth(monthIndex + 1),
                   children: [
                     for (var month = 1; month <= 12; ++month)
                       Row(
@@ -114,7 +101,7 @@ class DatePicker extends HookConsumerWidget {
                   itemExtent: 32,
                   selectionOverlay: null,
                   scrollController: yearController,
-                  onSelectedItemChanged: (year) => updateDateTime(year: year),
+                  onSelectedItemChanged: dateTimeController.updateYear,
                   children: [
                     for (var year = 0; year < 10000; ++year)
                       Row(
@@ -159,16 +146,4 @@ class DatePicker extends HookConsumerWidget {
       });
     }
   }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(
-      DiagnosticsProperty<ValueNotifier<DateTime>>('dateTime', dateTime),
-    );
-  }
-}
-
-extension on DateTime {
-  int get daysInMonth => DateTime(year, month + 1, 0).day;
 }

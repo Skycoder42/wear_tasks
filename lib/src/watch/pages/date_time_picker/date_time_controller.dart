@@ -2,20 +2,27 @@ import 'dart:math';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../common/extensions/core_extensions.dart';
+
 part 'date_time_controller.g.dart';
 
 @riverpod
 class DateTimeController extends _$DateTimeController {
-  static const _minuteInterval = 5;
+  static const minuteInterval = 5;
 
   @override
   DateTime build() => _toIntervalTime(DateTime.now());
 
-  void updateYear(int year) => _updateDate(year: year);
+  void initialize(DateTime dateTime) => state = _toIntervalTime(dateTime);
 
-  void updateMonth(int month) => _updateDate(month: month);
+  DateTime updateYear(int year) => _updateDate(year: year);
 
-  void updateDay(int day) => _updateDate(day: day);
+  DateTime updateMonth(int month) => _updateDate(month: month);
+
+  DateTime updateDay(int day) => _updateDate(day: day);
+
+  DateTime updateTime(int hour, int minute) =>
+      state = state.copyWith(hour: hour, minute: minute);
 
   void resetDate() {
     final now = _toIntervalTime(DateTime.now());
@@ -34,7 +41,7 @@ class DateTimeController extends _$DateTimeController {
     );
   }
 
-  void _updateDate({int? day, int? month, int? year}) {
+  DateTime _updateDate({int? day, int? month, int? year}) {
     final updatedMonthYear = state.copyWith(
       year: year,
       month: month,
@@ -46,18 +53,13 @@ class DateTimeController extends _$DateTimeController {
         day ?? state.day,
       ),
     );
-    state = updateDate;
+    return state = updateDate;
   }
 
   static DateTime _toIntervalTime(DateTime dateTime) => dateTime.copyWith(
-        minute: (dateTime.minute / _minuteInterval).round() * _minuteInterval,
+        minute: (dateTime.minute / minuteInterval).round() * minuteInterval,
         second: 0,
         millisecond: 0,
         microsecond: 0,
       );
-}
-
-// TODO move
-extension on DateTime {
-  int get daysInMonth => DateTime(year, month + 1, 0).day;
 }
