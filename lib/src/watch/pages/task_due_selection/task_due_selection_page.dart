@@ -102,8 +102,12 @@ class TaskDueSelectionPage extends HookConsumerWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-        .add(DiagnosticsProperty<DateTime>('initialDateTime', initialDateTime));
-    properties.add(DiagnosticsProperty<TaskRecurrence?>(
-        'initialRecurrence', initialRecurrence));
+      ..add(DiagnosticsProperty<DateTime>('initialDateTime', initialDateTime))
+      ..add(
+        DiagnosticsProperty<TaskRecurrence?>(
+          'initialRecurrence',
+          initialRecurrence,
+        ),
+      );
   }
 }
