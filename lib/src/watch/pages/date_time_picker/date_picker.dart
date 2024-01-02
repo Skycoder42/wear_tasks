@@ -3,21 +3,20 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../common/localization/localization.dart';
 import '../../widgets/hooks/fixed_extent_scroll_controller_hook.dart';
+import 'date_time_controller.dart';
 
-class DatePicker extends HookWidget {
-  final ValueNotifier<DateTime> dateTime;
-
-  const DatePicker(
-    this.dateTime, {
+class DatePicker extends HookConsumerWidget {
+  const DatePicker({
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final currentDateTime = useValueListenable(dateTime);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final initialDateTime = ref.read(dateTimeControllerProvider);
 
     final dayController = useFixedExtentScrollController(
       initialIndex: currentDateTime.day - 1,
