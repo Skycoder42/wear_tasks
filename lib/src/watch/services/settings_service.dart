@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
@@ -20,6 +22,7 @@ Future<SettingsService> settingsService(SettingsServiceRef ref) async {
 
 class SettingsService {
   static const _initKey = '__init';
+  static const _hiveCipherKey = 'hive.cipherKey';
   static const _etebaseAccountDataKey = 'etebase.accountData';
   static const _etebaseServerUrlKey = 'etebase.serverUrl';
   static const _etebaseDefaultCollectionKey = 'etebase.defaultCollection';
@@ -38,6 +41,16 @@ class SettingsService {
       await _secureStorage.write(key: SettingsService._initKey, value: '');
     }
   }
+
+  Future<List<int>?> getHiveCipherKey() => _secureStorage
+      .read(key: _hiveCipherKey)
+      .then((value) => value != null ? base64.decode(value) : null);
+
+  Future<void> setHiveCipherKey(List<int> hiveCipherKey) => _secureStorage
+      .write(key: _hiveCipherKey, value: base64.encode(hiveCipherKey));
+
+  Future<void> removeHiveCipherKey() =>
+      _secureStorage.delete(key: _hiveCipherKey);
 
   Future<String?> getEtebaseAccountData() =>
       _secureStorage.read(key: _etebaseAccountDataKey);
