@@ -6,8 +6,9 @@ import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../common/extensions/etebase_extensions.dart';
+import '../../common/providers/etebase_sync_provider.dart';
+import '../../etebase_sync/storage/collection_storage.dart';
 import '../services/account_service.dart';
-import 'storages/collection_storage.dart';
 
 part 'collection_repository.g.dart';
 
@@ -128,8 +129,7 @@ class CollectionRepository {
   Future<bool> retryPendingUpload() async {
     var allDone = true;
 
-    await for (final collection
-        in _collectionStorage.loadAll(needsUploadOnly: true)) {
+    await for (final collection in _collectionStorage.loadPendingUploads()) {
       final uid = await collection.getUid();
       try {
         await _collectionManager.upload(collection);
@@ -197,7 +197,7 @@ class CollectionRepository {
       },
     );
     if (!fromStorage) {
-      await _collectionStorage.save(collection, needsUpload: needsUpload);
+      await _collectionStorage.save(collection, pendingUpload: needsUpload);
     }
     return didCreate;
   }
