@@ -25,12 +25,20 @@ Future<HiveCipher> hiveCipher(HiveCipherRef ref) async {
 }
 
 @Riverpod(keepAlive: true)
-Future<LazyBox> hiveBox(HiveBoxRef ref, String boxName) async {
-  final hive = await ref.watch(hiveProvider.future);
-  final box = await hive.openLazyBox(
-    boxName,
-    encryptionCipher: await ref.watch(hiveCipherProvider.future),
-  );
-  ref.onDispose(box.close);
-  return box;
+Future<HiveBoxFactory> hiveBoxFactory(HiveBoxFactoryRef ref) async =>
+    HiveBoxFactory(
+      await ref.watch(hiveProvider.future),
+      await ref.watch(hiveCipherProvider.future),
+    );
+
+class HiveBoxFactory {
+  final HiveInterface hive;
+  final HiveCipher cipher;
+
+  HiveBoxFactory(this.hive, this.cipher);
+
+  Future<LazyBox<T>> call<T>(String boxName) => hive.openLazyBox<T>(
+        boxName,
+        encryptionCipher: cipher,
+      );
 }

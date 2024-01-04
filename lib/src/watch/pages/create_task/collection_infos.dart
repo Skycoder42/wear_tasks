@@ -58,9 +58,10 @@ class CollectionInfos extends _$CollectionInfos {
     return _createInfo(uid, metadata);
   }
 
-  CollectionInfo _createInfo(String uid, EtebaseItemMetadata metadata) => (
+  CollectionInfo _createInfo(String uid, EtebaseItemMetadata? metadata) => (
         uid: uid,
-        name: metadata.name,
-        color: metadata.color != null ? HexColor.parse(metadata.color!) : null,
+        name: metadata?.name,
+        color:
+            metadata?.color != null ? HexColor.parse(metadata!.color!) : null,
       );
 }

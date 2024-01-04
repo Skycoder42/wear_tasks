@@ -19,7 +19,7 @@ Future<ItemRepository> itemRepository(
   final colRepo = await ref.watch(collectionRepositoryProvider.future);
   final repository = ItemRepository(
     collectionUid,
-    await colRepo.getItemManager(collectionUid),
+    (await colRepo.getItemManager(collectionUid))!,
     iCalBinaryCodec,
   );
   ref.onDispose(repository.dispose);
