@@ -3,7 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../common/providers/etebase_provider.dart';
-import 'settings_service.dart';
+import '../repositories/settings.dart';
 
 part 'account_service.g.dart';
 
@@ -29,14 +29,14 @@ class AccountService extends _$AccountService {
   @override
   Future<EtebaseAccount?> build() async {
     _logger.fine('Restoring account');
-    final settings = await ref.watch(settingsServiceProvider.future);
-    final accountData = await settings.getEtebaseAccountData();
+    final settings = await ref.watch(settingsProvider.future);
+    final accountData = settings.etebase.accountData;
     if (accountData == null) {
       _logger.info('No account data in secure storage');
       return null;
     }
 
-    final serverUrl = await settings.getEtebaseServerUrl();
+    final serverUrl = settings.etebase.serverUrl;
     _logger.fine('Creating client for server: $serverUrl');
     final client = await ref.watch(etebaseClientProvider(serverUrl).future);
     _logger.fine('Restoring account from persisted data');
@@ -59,14 +59,14 @@ class AccountService extends _$AccountService {
         await oldAccount?.logout();
 
         _logger.fine('Creating client for server: $serverUrl');
-        final settings = await ref.watch(settingsServiceProvider.future);
+        final settings = await ref.watch(settingsProvider.future);
         final client = await ref.watch(etebaseClientProvider(serverUrl).future);
 
         _logger.fine('Logging in for account $username');
         account = await EtebaseAccount.login(client, username, password);
 
         _logger.fine('Persisting account data to secure storage');
-        await settings.setEtebaseAccountData(await account.save());
+        await settings.etebase.setAccountData(await account.save());
 
         _logger.info('Successfully logged in');
         ref.onDispose(account.dispose);
@@ -86,9 +86,9 @@ class AccountService extends _$AccountService {
     await future.then((account) async => account?.logout(), onError: (_) {});
 
     _logger.fine('Deleting account data from secure storage');
-    final settings = await ref.read(settingsServiceProvider.future);
-    await settings.removeEtebaseAccountData();
-    await settings.removeEtebaseServerUrl();
+    final settings = await ref.read(settingsProvider.future);
+    await settings.etebase.removeAccountData();
+    await settings.etebase.removeServerUrl();
 
     _logger.fine('Invalidating provider');
     ref.invalidateSelf();

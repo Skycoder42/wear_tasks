@@ -1,7 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../watch/services/settings_service.dart';
+import '../../watch/repositories/settings.dart';
 
 part 'hive_provider.g.dart';
 
@@ -14,12 +14,12 @@ Future<HiveInterface> hive(HiveRef ref) async {
 
 @Riverpod(keepAlive: true)
 Future<HiveCipher> hiveCipher(HiveCipherRef ref) async {
-  final settings = await ref.watch(settingsServiceProvider.future);
-  var key = await settings.getHiveCipherKey();
+  final settings = await ref.watch(settingsProvider.future);
+  var key = settings.hive.cipherKey;
   if (key == null) {
     final hive = await ref.read(hiveProvider.future);
     key = hive.generateSecureKey();
-    await settings.setHiveCipherKey(key);
+    await settings.hive.setCipherKey(key);
   }
   return HiveAesCipher(key);
 }

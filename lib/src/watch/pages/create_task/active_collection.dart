@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../services/settings_service.dart';
+import '../../repositories/settings.dart';
 import 'collection_infos.dart';
 
 part 'active_collection.g.dart';
@@ -9,15 +9,17 @@ part 'active_collection.g.dart';
 class ActiveCollection extends _$ActiveCollection {
   @override
   Future<String> build() async {
-    final settings = await ref.watch(settingsServiceProvider.future);
+    final settings = await ref.watch(settingsProvider.future);
     final collections = await ref.watch(collectionInfosProvider.future);
 
-    final defaultCollection = await settings.getEtebaseDefaultCollection();
+    final defaultCollection = settings.etebase.defaultCollection;
     if (defaultCollection != null &&
         collections.any((i) => i.uid == defaultCollection)) {
       return defaultCollection;
     } else {
-      return collections.first.uid;
+      final collectionUid = collections.first.uid;
+      await settings.etebase.setDefaultCollection(collectionUid);
+      return collectionUid;
     }
   }
 
@@ -28,8 +30,8 @@ class ActiveCollection extends _$ActiveCollection {
         }
 
         if (asDefault) {
-          final settings = await ref.read(settingsServiceProvider.future);
-          await settings.setEtebaseDefaultCollection(currentUid);
+          final settings = await ref.read(settingsProvider.future);
+          await settings.etebase.setDefaultCollection(currentUid);
         }
 
         return newUid;
