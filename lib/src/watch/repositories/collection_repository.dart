@@ -130,9 +130,7 @@ class CollectionRepository with RepositoryMixin {
 
   Future<bool> hasPendingUploads() => _collectionStorage.hasPendingUploads();
 
-  Future<bool> retryPendingUploads() async {
-    var allDone = true;
-
+  Future<void> retryPendingUploads() async {
     await for (final collection in _collectionStorage.loadPendingUploads()) {
       final uid = await collection.getUid();
       try {
@@ -142,19 +140,14 @@ class CollectionRepository with RepositoryMixin {
         // ignore: avoid_catches_without_on_clauses
       } catch (e, s) {
         if (!handleNetworkError(e, s, 'col: $uid')) {
-          logger.severe(
-            'Failed to upload collection $uid',
-            e,
-            s,
-          );
+          logger.severe('Failed to upload collection $uid', e, s);
+          await _updateCache(uid, collection); // ignore error
+          rethrow;
         }
-        allDone = false;
       } finally {
         await collection.dispose();
       }
     }
-
-    return allDone;
   }
 
   Future<void> dispose() async {

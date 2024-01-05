@@ -69,8 +69,7 @@ class ItemRepository with RepositoryMixin {
 
   bool hasPendingUploads() => _itemStorage.hasItems;
 
-  Future<bool> retryPendingUploads() async {
-    var allDone = true;
+  Future<void> retryPendingUploads() async {
     await for (final item in _itemStorage.loadAll()) {
       final uid = await item.getUid();
       try {
@@ -80,18 +79,14 @@ class ItemRepository with RepositoryMixin {
         // ignore: avoid_catches_without_on_clauses
       } catch (e, s) {
         if (!handleNetworkError(e, s, 'item: $uid')) {
-          logger.severe(
-            'Failed to upload item $uid',
-            e,
-            s,
-          );
+          logger.severe('Failed to upload item $uid', e, s);
+          await _itemStorage.remove(uid); // ignore error
+          rethrow;
         }
-        allDone = false;
       } finally {
         await item.dispose();
       }
     }
-    return allDone;
   }
 
   Future<void> dispose() async {

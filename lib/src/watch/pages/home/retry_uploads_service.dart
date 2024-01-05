@@ -12,8 +12,6 @@ class RetryUploadsState with _$RetryUploadsState {
   const factory RetryUploadsState.allUploaded() = AllUploadedRetryState;
   const factory RetryUploadsState.hasPending() = HasPendingUploadsRetryState;
   const factory RetryUploadsState.uploading() = UploadingRetryState;
-  const factory RetryUploadsState.uploadFailed(Object error) =
-      UploadFailedRetryState;
 }
 
 @riverpod
@@ -36,7 +34,7 @@ class RetryUploadsService extends _$RetryUploadsService {
   }
 
   Future<void> uploadPending() async {
-    switch (future) {
+    switch (await future) {
       case AllUploadedRetryState():
       case UploadingRetryState():
         return;
@@ -44,11 +42,23 @@ class RetryUploadsService extends _$RetryUploadsService {
         break;
     }
 
-    state = const AsyncData(RetryUploadsState.uploading());
+    state = const AsyncValue.data(RetryUploadsState.uploading());
+    try {
+      final collectionRepository =
+          await ref.read(collectionRepositoryProvider.future);
+      await collectionRepository.retryPendingUploads();
 
-    final collectionRepository =
-        await ref.read(collectionRepositoryProvider.future);
+      await for (final uid in collectionRepository.listAll()) {
+        final itemRepository =
+            await ref.watch(itemRepositoryProvider(uid).future);
+        await itemRepository.retryPendingUploads();
+      }
 
-    // TODO here
+      ref.invalidateSelf();
+
+      // ignore: avoid_catches_without_on_clauses
+    } catch (e, s) {
+      state = AsyncValue.error(e, s);
+    }
   }
 }
