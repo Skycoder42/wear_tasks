@@ -5,9 +5,9 @@ import 'package:etebase_flutter/etebase_flutter.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../common/extensions/etebase_extensions.dart';
 import '../services/account_service.dart';
 import '../storage/collection_storage.dart';
+import 'repository_mixin.dart';
 
 part 'collection_repository.g.dart';
 
@@ -24,12 +24,15 @@ Future<CollectionRepository> collectionRepository(
   return repository;
 }
 
-class CollectionRepository {
+class CollectionRepository with RepositoryMixin {
   static const _tasksCollectionType = 'etebase.vtodo';
 
   final EtebaseCollectionManager _collectionManager;
   final CollectionStorage _collectionStorage;
-  final _logger = Logger('$CollectionRepository');
+
+  @override
+  @visibleForOverriding
+  final logger = Logger('$CollectionRepository');
 
   final _collections = <String, EtebaseCollection>{};
   final _responseRefs = <EtebaseCollectionListResponse>[];
@@ -74,7 +77,7 @@ class CollectionRepository {
 
       // ignore: avoid_catches_without_on_clauses
     } catch (e, s) {
-      if (!_handleNetworkError(e, s)) {
+      if (!handleNetworkError(e, s)) {
         rethrow;
       }
 
@@ -112,12 +115,12 @@ class CollectionRepository {
     await _updateCache(uid, collection, needsUpload: true);
     try {
       await _collectionManager.upload(collection);
-      await _collectionStorage.save(collection);
+      await _collectionStorage.save(uid, collection);
 
       // ignore: avoid_catches_without_on_clauses
     } catch (e, s) {
       await collection.dispose();
-      if (!_handleNetworkError(e, s, 'col: $uid')) {
+      if (!handleNetworkError(e, s, 'col: $uid')) {
         rethrow;
       }
     }
@@ -125,7 +128,9 @@ class CollectionRepository {
     return uid;
   }
 
-  Future<bool> retryPendingUpload() async {
+  Future<bool> hasPendingUploads() => _collectionStorage.hasPendingUploads();
+
+  Future<bool> retryPendingUploads() async {
     var allDone = true;
 
     await for (final collection in _collectionStorage.loadPendingUploads()) {
@@ -136,8 +141,8 @@ class CollectionRepository {
 
         // ignore: avoid_catches_without_on_clauses
       } catch (e, s) {
-        if (!_handleNetworkError(e, s, 'col: $uid')) {
-          _logger.severe(
+        if (!handleNetworkError(e, s, 'col: $uid')) {
+          logger.severe(
             'Failed to upload collection $uid',
             e,
             s,
@@ -196,7 +201,11 @@ class CollectionRepository {
       },
     );
     if (!fromStorage) {
-      await _collectionStorage.save(collection, pendingUpload: needsUpload);
+      await _collectionStorage.save(
+        uid,
+        collection,
+        pendingUpload: needsUpload,
+      );
     }
     return didCreate;
   }
@@ -218,28 +227,5 @@ class CollectionRepository {
       _responseRefs.clear();
       _stoken = null;
     }
-  }
-
-  bool _handleNetworkError(
-    Object error,
-    StackTrace stackTrace, [
-    String? extra,
-  ]) {
-    if (error case EtebaseException(code: final code)
-        when code.isNetworkError) {
-      final msgBuilder = StringBuffer(
-        'Etebase request failed due to connectivity errors',
-      );
-      if (extra != null) {
-        msgBuilder
-          ..write(' (')
-          ..write(extra)
-          ..write(')');
-      }
-      _logger.warning(msgBuilder, error, stackTrace);
-      return true;
-    }
-
-    return false;
   }
 }

@@ -49,11 +49,21 @@ class CreateTaskPage extends HookConsumerWidget {
       ..listenForErrors(context, activeCollectionProvider)
       ..listen(createTaskServiceProvider, (_, state) {
         switch (state) {
-          case CreateTaskSavedState():
+          case CreateTaskSavedState(didUpload: true):
             ScaffoldMessenger.of(context).showSnackBar(
               SuccessSnackBar(
                 context: context,
                 content: Text(context.strings.create_task_page_success_message),
+              ),
+            );
+            Navigator.pop(context);
+          case CreateTaskSavedState(didUpload: false):
+            ScaffoldMessenger.of(context).showSnackBar(
+              ErrorSnackBar(
+                context: context,
+                content: Text(
+                  context.strings.create_task_page_upload_failed_message,
+                ),
               ),
             );
             Navigator.pop(context);

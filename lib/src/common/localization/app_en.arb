@@ -82,6 +82,8 @@
   "login_page_login_button": "Login",
   "login_page_invalid": "Incomplete form",
   "login_page_succeeded": "Login successful!",
+  "home_page_create_task": "Create Task",
+  "home_page_retry_uploads": "Uploading pending",
   "create_task_page_summary_label": "Summary",
   "create_task_page_description_label": "Description",
   "date_picker_day": "{date}.",
@@ -138,5 +140,6 @@
   "validator_not_empty": "Must not be empty",
   "validator_https_url": "Must be a valid HTTPS url",
   "create_task_page_success_message": "Task created!",
+  "create_task_page_upload_failed_message": "Task upload failed!",
   "error_not_logged_in": "Not logged in"
 }

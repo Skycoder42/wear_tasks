@@ -16,44 +16,51 @@ Future<CollectionStorage> collectionStorage(CollectionStorageRef ref) async {
   final account = await ref.watch(etebaseAccountProvider.future);
   final boxFactory = await ref.watch(hiveBoxFactoryProvider.future);
   final storage = CollectionStorage(
-    collectionManager: await account.getCollectionManager(),
-    cacheBox: await boxFactory('collections'),
+    await account.getCollectionManager(),
+    await boxFactory('collections'),
   );
   ref.onDispose(storage.dispose);
   return storage;
 }
 
 class CollectionStorage {
-  final EtebaseCollectionManager collectionManager;
-  final LazyBox<StoredCollection> cacheBox;
-  final _logger = Logger('CollectionStorage');
+  final EtebaseCollectionManager _collectionManager;
+  final LazyBox<StoredCollection> _cacheBox;
+  final _logger = Logger('$CollectionStorage');
 
-  CollectionStorage({
-    required this.collectionManager,
-    required this.cacheBox,
-  });
+  CollectionStorage(this._collectionManager, this._cacheBox);
 
   Stream<EtebaseCollection> loadAll() => _loadAll();
+
+  Future<EtebaseCollection?> load(String uid) => _load(uid);
+
+  Future<bool> hasPendingUploads() async {
+    for (final uid in _cacheBox.keys.cast<String>()) {
+      final item = await _cacheBox.get(uid);
+      if (item case StoredCollection(pendingUpload: true)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
   Stream<EtebaseCollection> loadPendingUploads() =>
       _loadAll(pendingUpdateOnly: true);
 
-  Future<EtebaseCollection?> load(String uid) => _load(uid);
-
   Future<void> save(
+    String uid,
     EtebaseCollection collection, {
-    String? uidHint,
     bool pendingUpload = false,
   }) async {
-    final uid = uidHint ?? await collection.getUid();
     _logger.finest(
       'Saving collection $uid to storage (pendingUpload: $pendingUpload)',
     );
 
-    await cacheBox.put(
+    await _cacheBox.put(
       uid,
       StoredCollection(
-        await collectionManager.cacheSaveWithContent(collection),
+        await _collectionManager.cacheSaveWithContent(collection),
         pendingUpload: pendingUpload,
       ),
     );
@@ -62,23 +69,36 @@ class CollectionStorage {
 
   Future<void> remove(String uid) async {
     _logger.finer('Removing collection $uid from storage');
-    await cacheBox.delete(uid);
+    await _cacheBox.delete(uid);
   }
 
   Future<void> clear({bool fromDisk = false}) async {
     if (fromDisk) {
       _logger.fine('Deleting collection storage from disk');
-      await cacheBox.deleteFromDisk();
+      await _cacheBox.deleteFromDisk();
     } else {
       _logger.fine('Clearing collection storage');
-      await cacheBox.clear();
+      await _cacheBox.clear();
     }
   }
 
-  Future<void> dispose() async {
-    await cacheBox.close();
-    await collectionManager.dispose();
+  Future<EtebaseItemManager?> getItemManager(String uid) async {
+    final collection = await _load(uid);
+    try {
+      if (collection != null) {
+        return _collectionManager.getItemManager(collection);
+      } else {
+        return null;
+      }
+    } finally {
+      await collection?.dispose();
+    }
   }
+
+  Future<void> dispose() => Future.wait([
+        _cacheBox.close(),
+        _collectionManager.dispose(),
+      ]);
 
   Future<EtebaseCollection?> _load(
     String uid, {
@@ -88,7 +108,7 @@ class CollectionStorage {
       'Attempting to load collection $uid from storage '
       '(pendingUpdateOnly: $pendingUpdateOnly)',
     );
-    final collection = await cacheBox.get(uid);
+    final collection = await _cacheBox.get(uid);
 
     if (collection == null) {
       _logger.fine('No collection with uid $uid in storage');
@@ -99,7 +119,7 @@ class CollectionStorage {
     }
 
     _logger.finest('Found collection $uid');
-    return collectionManager.cacheLoad(collection.data);
+    return _collectionManager.cacheLoad(collection.data);
   }
 
   Stream<EtebaseCollection> _loadAll({
@@ -111,7 +131,7 @@ class CollectionStorage {
       'from storage',
     );
 
-    for (final uid in cacheBox.keys.cast<String>()) {
+    for (final uid in _cacheBox.keys.cast<String>()) {
       final collection = await _load(uid, pendingUpdateOnly: pendingUpdateOnly);
       if (collection != null) {
         yield collection;
