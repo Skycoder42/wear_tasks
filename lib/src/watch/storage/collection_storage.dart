@@ -1,8 +1,27 @@
 import 'package:etebase_flutter/etebase_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:logging/logging.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../hive/model/stored_collection.dart';
+import '../../common/providers/hive_provider.dart';
+import '../../watch/services/account_service.dart';
+import 'hive/hive_extensions.dart';
+import 'hive/stored_collection.dart';
+
+part 'collection_storage.g.dart';
+
+@Riverpod(keepAlive: true)
+Future<CollectionStorage> collectionStorage(CollectionStorageRef ref) async {
+  await ref.watch(registerAdaptersProvider.future);
+  final account = await ref.watch(etebaseAccountProvider.future);
+  final boxFactory = await ref.watch(hiveBoxFactoryProvider.future);
+  final storage = CollectionStorage(
+    collectionManager: await account.getCollectionManager(),
+    cacheBox: await boxFactory('collections'),
+  );
+  ref.onDispose(storage.dispose);
+  return storage;
+}
 
 class CollectionStorage {
   final EtebaseCollectionManager collectionManager;

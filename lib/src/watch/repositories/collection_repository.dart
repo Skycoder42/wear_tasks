@@ -6,9 +6,8 @@ import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../common/extensions/etebase_extensions.dart';
-import '../../common/providers/etebase_sync_provider.dart';
-import '../../etebase_sync/storage/collection_storage.dart';
 import '../services/account_service.dart';
+import '../storage/collection_storage.dart';
 
 part 'collection_repository.g.dart';
 
