@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 
 part 'uuid_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 Uuid uuid(UuidRef ref) => Uuid(
       goptions: GlobalOptions(CryptoRNG()),
     );

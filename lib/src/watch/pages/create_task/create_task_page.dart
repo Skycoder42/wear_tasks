@@ -11,12 +11,12 @@ import '../../../common/widgets/success_snack_bar.dart';
 import '../../app/router/watch_router.dart';
 import '../../models/task.dart';
 import '../../models/task_recurrence.dart';
+import '../../services/create_task_service.dart';
 import '../../widgets/submit_form.dart';
 import '../../widgets/watch_scaffold.dart';
-import 'active_collection.dart';
-import 'collection_infos.dart';
-import 'collection_selector_button.dart';
-import 'create_task_service.dart';
+import 'collection_selection/active_collection.dart';
+import 'collection_selection/collection_infos.dart';
+import 'collection_selection/collection_selector_button.dart';
 import 'priority_button.dart';
 
 class CreateTaskPage extends HookConsumerWidget {

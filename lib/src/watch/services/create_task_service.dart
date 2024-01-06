@@ -3,9 +3,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../models/task.dart';
-import '../../repositories/item_repository.dart';
-import '../../services/task_factory.dart';
+import '../models/task.dart';
+import '../repositories/item_repository.dart';
+import 'task_factory.dart';
 
 part 'create_task_service.freezed.dart';
 part 'create_task_service.g.dart';

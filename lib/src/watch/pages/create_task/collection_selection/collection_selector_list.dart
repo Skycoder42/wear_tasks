@@ -4,7 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../app/watch_theme.dart';
+import '../../../app/watch_theme.dart';
 import 'collection_infos.dart';
 import 'collection_selector_button.dart';
 

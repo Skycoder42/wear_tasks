@@ -4,9 +4,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../common/extensions/riverpod_extensions.dart';
 import '../../../common/localization/localization.dart';
 import '../../app/router/watch_router.dart';
+import '../../services/retry_uploads_service.dart';
+import '../../widgets/side_button.dart';
 import '../../widgets/watch_scaffold.dart';
 import '../create_task/create_task_page.dart';
-import 'retry_uploads_service.dart';
 
 class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
@@ -19,6 +20,10 @@ class HomePage extends HookConsumerWidget {
       horizontalSafeArea: true,
       loadingOverlayActive:
           ref.watch(retryUploadsServiceProvider.select(_isLoading)),
+      leftAction: SideButton(
+        icon: const Icon(Icons.settings),
+        onPressed: () => const SettingsRoute().go(context),
+      ),
       body: ListView(
         children: [
           Hero(
@@ -29,16 +34,14 @@ class HomePage extends HookConsumerWidget {
               onPressed: () => const CreateTaskRoute().go(context),
             ),
           ),
-          OutlinedButton.icon(
-            icon: const Icon(Icons.upload),
-            label: Text(context.strings.home_page_retry_uploads),
-            onPressed:
-                ref.watch(retryUploadsServiceProvider.select(_hasPending))
-                    ? () async => ref
-                        .read(retryUploadsServiceProvider.notifier)
-                        .uploadPending()
-                    : null,
-          ),
+          if (ref.watch(retryUploadsServiceProvider.select(_hasPending)))
+            OutlinedButton.icon(
+              icon: const Icon(Icons.upload),
+              label: Text(context.strings.home_page_retry_uploads),
+              onPressed: () async => ref
+                  .read(retryUploadsServiceProvider.notifier)
+                  .uploadPending(),
+            ),
         ],
       ),
     );

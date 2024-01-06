@@ -1,8 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../repositories/collection_repository.dart';
-import '../../repositories/item_repository.dart';
+import '../repositories/collection_repository.dart';
+import '../repositories/item_repository.dart';
 
 part 'retry_uploads_service.freezed.dart';
 part 'retry_uploads_service.g.dart';

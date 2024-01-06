@@ -4,6 +4,7 @@ part of '../watch_router.dart';
   path: '/',
   routes: [
     TypedGoRoute<CreateTaskRoute>(path: 'tasks/create'),
+    TypedGoRoute<SettingsRoute>(path: 'settings'),
   ],
 )
 @immutable
@@ -21,4 +22,13 @@ class CreateTaskRoute extends GoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const CreateTaskPage();
+}
+
+@immutable
+class SettingsRoute extends GoRouteData {
+  const SettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const SettingsPage();
 }

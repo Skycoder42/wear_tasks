@@ -22,7 +22,7 @@ class SharedPreferences {
 
   final FlutterSecureStorage _secureStorage;
 
-  final _valueCache = <String, String>{};
+  late Map<String, String> _valueCache;
 
   SharedPreferences(this._secureStorage);
 
@@ -33,9 +33,7 @@ class SharedPreferences {
   }
 
   Future<void> reload() async {
-    _valueCache
-      ..clear()
-      ..addAll(await _secureStorage.readAll());
+    _valueCache = await _secureStorage.readAll();
   }
 
   bool containsKey(String key) => _valueCache.containsKey(key);

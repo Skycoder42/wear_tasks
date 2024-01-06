@@ -3,11 +3,11 @@ import 'dart:ui';
 import 'package:etebase_flutter/etebase_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../common/localization/localization.dart';
-import '../../../common/providers/package_info_provider.dart';
-import '../../../common/utils/hex_color.dart';
-import '../../app/watch_theme.dart';
-import '../../repositories/collection_repository.dart';
+import '../../../../common/localization/localization.dart';
+import '../../../../common/providers/package_info_provider.dart';
+import '../../../../common/utils/hex_color.dart';
+import '../../../app/watch_theme.dart';
+import '../../../repositories/collection_repository.dart';
 
 part 'collection_infos.g.dart';
 

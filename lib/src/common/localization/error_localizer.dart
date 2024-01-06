@@ -20,7 +20,7 @@ class ErrorLocalizer {
         EtebaseException(code: final code) => code.name,
         NotLoggedInException() => _strings.error_not_logged_in,
         _ => switch (error.toString().split(':')) {
-            [final name, ...] => name,
+            [final name, _, ...] => name,
             _ => error.runtimeType.toString(),
           },
       };

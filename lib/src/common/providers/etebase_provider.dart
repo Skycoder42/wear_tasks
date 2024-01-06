@@ -5,7 +5,7 @@ import 'package_info_provider.dart';
 
 part 'etebase_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<Uri> etebaseDefaultServerUrl(EtebaseDefaultServerUrlRef ref) =>
     etebaseGetDefaultServerUrl();
 

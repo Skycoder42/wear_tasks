@@ -14,6 +14,7 @@ class WatchDialog<T> extends HookWidget {
   static const animationCurve = Curves.easeInOut;
 
   final bool horizontalSafeArea;
+  final bool loadingOverlayActive;
   final ValueCallback<T?>? onReject;
   final ValueCallback<T> onAccept;
   final IndexedWidgetBuilder? bottomActionBuilder;
@@ -25,6 +26,7 @@ class WatchDialog<T> extends HookWidget {
   WatchDialog({
     super.key,
     this.horizontalSafeArea = false,
+    this.loadingOverlayActive = false,
     bool canAccept = true,
     required this.onAccept,
     this.onReject,
@@ -37,6 +39,7 @@ class WatchDialog<T> extends HookWidget {
   WatchDialog.paged({
     super.key,
     this.horizontalSafeArea = false,
+    this.loadingOverlayActive = false,
     required this.onAccept,
     this.onReject,
     this.bottomActionBuilder,
@@ -65,6 +68,7 @@ class WatchDialog<T> extends HookWidget {
       },
       child: WatchScaffold(
         horizontalSafeArea: horizontalSafeArea,
+        loadingOverlayActive: loadingOverlayActive,
         leftAction: _buildButtonStack(pageController, [
           _buildRejectButton(context),
           for (var i = 1; i < pages.length; ++i)
@@ -160,6 +164,9 @@ class WatchDialog<T> extends HookWidget {
       ..add(ObjectFlagProperty<ValueCallback<T?>?>.has('onReject', onReject))
       ..add(
         DiagnosticsProperty<bool>('horizontalSafeArea', horizontalSafeArea),
+      )
+      ..add(
+        DiagnosticsProperty<bool>('loadingOverlayActive', loadingOverlayActive),
       )
       ..add(IterableProperty<bool>('pageValidations', pageValidations))
       ..add(

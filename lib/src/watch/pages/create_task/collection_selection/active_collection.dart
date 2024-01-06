@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../repositories/settings.dart';
+import '../../../repositories/settings.dart';
 import 'collection_infos.dart';
 
 part 'active_collection.g.dart';

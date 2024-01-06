@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../app/watch_theme.dart';
-import '../../widgets/side_button.dart';
+import '../../../app/watch_theme.dart';
+import '../../../widgets/hooks/change_notifier_hook.dart';
+import '../../../widgets/side_button.dart';
 import 'collection_infos.dart';
 import 'collection_selector_list.dart';
 
@@ -15,12 +16,14 @@ class CollectionSelectorButton extends HookConsumerWidget {
   final List<CollectionInfo> collections;
   final String currentCollection;
   final CollectionSelectedCallback onCollectionSelected;
+  final Listenable? externalOverlayTrigger;
 
   CollectionSelectorButton({
     super.key,
     required this.collections,
     required this.currentCollection,
     required this.onCollectionSelected,
+    this.externalOverlayTrigger,
   }) {
     if (collections.isEmpty) {
       throw ArgumentError.value(
@@ -52,6 +55,13 @@ class CollectionSelectorButton extends HookConsumerWidget {
       [overlayRef.value],
     );
 
+    final triggerOverlay = useCallback(
+      () => _showOverlay(context, ref, overlayRef),
+      [context, ref, overlayRef],
+    );
+
+    useListenableCallback(externalOverlayTrigger, triggerOverlay);
+
     final theme = ref.watch(
       watchThemeProvider(activeCollection.color ?? WatchTheme.appColor),
     );
@@ -66,7 +76,7 @@ class CollectionSelectorButton extends HookConsumerWidget {
           child: SideButton(
             filled: true,
             icon: const Icon(Icons.list),
-            onPressed: () => _showOverlay(context, ref, overlayRef),
+            onPressed: triggerOverlay,
           ),
         ),
       ),
@@ -116,6 +126,12 @@ class CollectionSelectorButton extends HookConsumerWidget {
         ObjectFlagProperty<CollectionSelectedCallback>.has(
           'onCollectionSelected',
           onCollectionSelected,
+        ),
+      )
+      ..add(
+        ObjectFlagProperty.has(
+          'externalOverlayTrigger',
+          externalOverlayTrigger,
         ),
       );
   }
