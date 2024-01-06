@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:settings_annotation/settings_annotation.dart';
 
@@ -21,6 +22,23 @@ abstract class Settings with _$Settings {
   HiveSettings get hive;
 
   EtebaseSettings get etebase;
+
+  @SettingsEntry(
+    defaultValue: LiteralDefault('const TimeOfDay(hour: 9, minute: 0)'),
+    fromSettings: _timeOfDayFromSettings,
+    toSettings: _timeOfDayToSettings,
+  )
+  TimeOfDay get defaultTime;
+
+  static TimeOfDay _timeOfDayFromSettings(int value) {
+    final d = Duration(minutes: value);
+    final hours = d.inHours;
+    final minutes = (d - Duration(hours: hours)).inMinutes;
+    return TimeOfDay(hour: hours, minute: minutes);
+  }
+
+  static int _timeOfDayToSettings(TimeOfDay timeOfDay) =>
+      Duration(hours: timeOfDay.hour, minutes: timeOfDay.minute).inMinutes;
 }
 
 @SettingsGroup()

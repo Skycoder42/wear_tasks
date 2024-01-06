@@ -20,29 +20,34 @@ class HomePage extends HookConsumerWidget {
       horizontalSafeArea: true,
       loadingOverlayActive:
           ref.watch(retryUploadsServiceProvider.select(_isLoading)),
-      leftAction: SideButton(
-        icon: const Icon(Icons.settings),
-        onPressed: () => const SettingsRoute().go(context),
+      bottomAction: Center(
+        child: SideButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () => const SettingsRoute().go(context),
+        ),
       ),
-      body: ListView(
-        children: [
-          Hero(
-            tag: CreateTaskPage.createButtonHeroTag,
-            child: FilledButton.icon(
-              icon: const Icon(Icons.add),
-              label: Text(context.strings.home_page_create_task),
-              onPressed: () => const CreateTaskRoute().go(context),
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Hero(
+              tag: CreateTaskPage.createButtonHeroTag,
+              child: FilledButton.icon(
+                icon: const Icon(Icons.add),
+                label: Text(context.strings.home_page_create_task),
+                onPressed: () => const CreateTaskRoute().go(context),
+              ),
             ),
-          ),
-          if (ref.watch(retryUploadsServiceProvider.select(_hasPending)))
-            OutlinedButton.icon(
-              icon: const Icon(Icons.upload),
-              label: Text(context.strings.home_page_retry_uploads),
-              onPressed: () async => ref
-                  .read(retryUploadsServiceProvider.notifier)
-                  .uploadPending(),
-            ),
-        ],
+            if (ref.watch(retryUploadsServiceProvider.select(_hasPending)))
+              OutlinedButton.icon(
+                icon: const Icon(Icons.upload),
+                label: Text(context.strings.home_page_retry_uploads),
+                onPressed: () async => ref
+                    .read(retryUploadsServiceProvider.notifier)
+                    .uploadPending(),
+              ),
+          ],
+        ),
       ),
     );
   }

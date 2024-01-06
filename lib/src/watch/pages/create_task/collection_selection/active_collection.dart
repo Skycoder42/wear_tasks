@@ -23,17 +23,5 @@ class ActiveCollection extends _$ActiveCollection {
     }
   }
 
-  Future<void> setActive(String newUid, {bool asDefault = false}) =>
-      update((currentUid) async {
-        if (newUid == currentUid) {
-          return currentUid;
-        }
-
-        if (asDefault) {
-          final settings = await ref.read(settingsProvider.future);
-          await settings.etebase.setDefaultCollection(currentUid);
-        }
-
-        return newUid;
-      });
+  Future<void> setActive(String newUid) => update((currentUid) => newUid);
 }

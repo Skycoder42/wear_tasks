@@ -137,6 +137,7 @@
       }
     }
   },
+  "settings_page_default_time": "Default time",
   "settings_page_default_collection": "Default collection",
   "validator_not_empty": "Must not be empty",
   "validator_https_url": "Must be a valid HTTPS url",
