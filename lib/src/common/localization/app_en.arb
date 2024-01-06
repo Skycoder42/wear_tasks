@@ -137,6 +137,7 @@
       }
     }
   },
+  "settings_page_default_collection": "Default collection",
   "validator_not_empty": "Must not be empty",
   "validator_https_url": "Must be a valid HTTPS url",
   "create_task_page_success_message": "Task created!",

@@ -15,12 +15,14 @@ class CollectionSelectorList extends HookConsumerWidget {
   final List<CollectionInfo> collections;
   final String currentUid;
   final CollectionSelectedCallback onSelected;
+  final Alignment animationAlignment;
 
   const CollectionSelectorList({
     super.key,
     required this.collections,
     required this.currentUid,
     required this.onSelected,
+    this.animationAlignment = Alignment.centerRight,
   });
 
   @override
@@ -56,7 +58,7 @@ class CollectionSelectorList extends HookConsumerWidget {
     )
         .animate(controller: animationController)
         .fade(duration: _animationDuration)
-        .scale(alignment: Alignment.centerRight, duration: _animationDuration);
+        .scale(alignment: animationAlignment, duration: _animationDuration);
   }
 
   @override
@@ -69,6 +71,12 @@ class CollectionSelectorList extends HookConsumerWidget {
         ObjectFlagProperty<CollectionSelectedCallback>.has(
           'onSelected',
           onSelected,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<Alignment>(
+          'animationAlignment',
+          animationAlignment,
         ),
       );
   }

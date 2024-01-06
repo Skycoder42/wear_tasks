@@ -17,6 +17,7 @@ class CollectionSelectorButton extends HookConsumerWidget {
   final String currentCollection;
   final CollectionSelectedCallback onCollectionSelected;
   final Listenable? externalOverlayTrigger;
+  final Alignment animationAlignment;
 
   CollectionSelectorButton({
     super.key,
@@ -24,6 +25,7 @@ class CollectionSelectorButton extends HookConsumerWidget {
     required this.currentCollection,
     required this.onCollectionSelected,
     this.externalOverlayTrigger,
+    this.animationAlignment = Alignment.centerRight,
   }) {
     if (collections.isEmpty) {
       throw ArgumentError.value(
@@ -98,6 +100,7 @@ class CollectionSelectorButton extends HookConsumerWidget {
           CollectionSelectorList(
             collections: collections,
             currentUid: currentCollection,
+            animationAlignment: animationAlignment,
             onSelected: (uid) {
               overlayRef.value = null;
               onCollectionSelected(uid);
@@ -132,6 +135,12 @@ class CollectionSelectorButton extends HookConsumerWidget {
         ObjectFlagProperty.has(
           'externalOverlayTrigger',
           externalOverlayTrigger,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<Alignment>(
+          'animationAlignment',
+          animationAlignment,
         ),
       );
   }
