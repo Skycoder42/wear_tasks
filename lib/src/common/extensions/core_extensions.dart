@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 extension DateTimeX on DateTime {
   int get daysInMonth => DateTime(year, month + 1, 0).day;
 
+  DateTime addMonths(int months) => copyWith(month: month + months);
+
+  DateTime addYears(int years) => copyWith(year: year + years);
+
   DateTime get date =>
       isUtc ? DateTime.utc(year, month, day) : DateTime(year, month, day);
 
