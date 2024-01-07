@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../common/extensions/riverpod_extensions.dart';
@@ -14,9 +13,8 @@ import '../../models/task_recurrence.dart';
 import '../../services/create_task_service.dart';
 import '../../widgets/submit_form.dart';
 import '../../widgets/watch_scaffold.dart';
-import 'collection_selection/active_collection.dart';
-import 'collection_selection/collection_infos.dart';
 import 'collection_selection/collection_selector_button.dart';
+import 'create_task_controller.dart';
 import 'priority_button.dart';
 
 class CreateTaskPage extends HookConsumerWidget {
@@ -29,24 +27,12 @@ class CreateTaskPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final initialDueDate = useMemoized(() {
-      final now = DateTime.now();
-      return DateTime(now.year, now.month, now.day + 1, 9);
-    });
-    final currentDueDate = useState(initialDueDate);
-    final currentRecurrence = useState<TaskRecurrence?>(null);
-    final currentPriority = useState(TaskPriority.none);
-
-    final collectionInfos = ref.watch(collectionInfosProvider);
-    final activeCollection = ref.watch(activeCollectionProvider);
+    final state = ref.watch(createTaskControllerProvider);
     final createTaskState = ref.watch(createTaskServiceProvider);
-    final isProcessing = collectionInfos.isLoading ||
-        activeCollection.isLoading ||
-        createTaskState.isSaving;
+    final isProcessing = state.isLoading || createTaskState.isSaving;
 
     ref
-      ..listenForErrors(context, collectionInfosProvider)
-      ..listenForErrors(context, activeCollectionProvider)
+      ..listenForErrors(context, createTaskControllerProvider)
       ..listen(createTaskServiceProvider, (_, state) {
         switch (state) {
           case CreateTaskSavedState(didUpload: true):
@@ -81,27 +67,34 @@ class CreateTaskPage extends HookConsumerWidget {
       onValidationFailed: () {},
       onSubmit: (result) async => _createTask(
         ref,
-        activeCollection.requireValue,
+        state.requireValue.currentCollection,
         result[_summaryKey] as String,
-        currentDueDate.value,
-        currentRecurrence.value,
-        currentPriority.value,
+        state.requireValue.currentDueDate,
+        state.requireValue.currentRecurrence,
+        state.requireValue.currentPriority,
         result[_descriptionKey] as String?,
       ),
       builder: (context, onSaved, onSubmit) => WatchScaffold(
         loadingOverlayActive: isProcessing,
-        leftAction: PriorityButton(
-          currentPriority: currentPriority.value,
-          onPriorityChanged: (p) => currentPriority.value = p,
-        ),
-        rightAction: collectionInfos.hasValue && activeCollection.hasValue
-            ? CollectionSelectorButton(
-                collections: collectionInfos.requireValue,
-                currentCollection: activeCollection.requireValue,
-                onCollectionSelected: (uid) async =>
-                    ref.read(activeCollectionProvider.notifier).setActive(uid),
-              )
-            : null,
+        leftAction: switch (state) {
+          AsyncData(value: final value) => PriorityButton(
+              currentPriority: value.currentPriority,
+              onPriorityChanged: (p) async => ref
+                  .read(createTaskControllerProvider.notifier)
+                  .updatePriority(p),
+            ),
+          _ => null,
+        },
+        rightAction: switch (state) {
+          AsyncData(value: final value) => CollectionSelectorButton(
+              collections: value.collectionInfos,
+              currentCollection: value.currentCollection,
+              onCollectionSelected: (uid) async => ref
+                  .read(createTaskControllerProvider.notifier)
+                  .updateCollection(uid),
+            ),
+          _ => null,
+        },
         bottomAction: Hero(
           tag: createButtonHeroTag,
           child: FilledButton(
@@ -128,24 +121,27 @@ class CreateTaskPage extends HookConsumerWidget {
                     onSaved: (newValue) => onSaved(_summaryKey, newValue),
                   ),
                   const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: currentRecurrence.value != null
-                        ? const Icon(Icons.event_repeat)
-                        : const Icon(Icons.event),
-                    label: Text(
-                      context.strings.taskDueDescription(currentDueDate.value),
+                  if (state case AsyncData(value: final value))
+                    ElevatedButton.icon(
+                      icon: value.currentRecurrence != null
+                          ? const Icon(Icons.event_repeat)
+                          : const Icon(Icons.event),
+                      label: Text(
+                        context.strings
+                            .taskDueDescription(value.currentDueDate),
+                      ),
+                      onPressed: () async {
+                        final result = await DateTimeSelectionRoute.from(
+                          value.currentDueDate,
+                          value.currentRecurrence,
+                        ).push<(DateTime, TaskRecurrence?)>(context);
+                        if (result case (final dateTime, final recurrence)) {
+                          await ref
+                              .read(createTaskControllerProvider.notifier)
+                              .updateDueDate(dateTime, recurrence);
+                        }
+                      },
                     ),
-                    onPressed: () async {
-                      final result = await DateTimeSelectionRoute.from(
-                        currentDueDate.value,
-                        currentRecurrence.value,
-                      ).push<(DateTime, TaskRecurrence?)>(context);
-                      if (result case (final dateTime, final recurrence)) {
-                        currentDueDate.value = dateTime;
-                        currentRecurrence.value = recurrence;
-                      }
-                    },
-                  ),
                   TextFormField(
                     enabled: !isProcessing,
                     decoration: InputDecoration(
