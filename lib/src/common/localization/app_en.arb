@@ -143,5 +143,7 @@
   "validator_https_url": "Must be a valid HTTPS url",
   "create_task_page_success_message": "Task created!",
   "create_task_page_upload_failed_message": "Task upload failed!",
-  "error_not_logged_in": "Not logged in"
+  "error_not_logged_in": "Not logged in",
+  "expression_tomorrow": "Tomorrow",
+  "expression_next_week": "Next Week"
 }

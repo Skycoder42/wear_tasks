@@ -68,11 +68,11 @@ sealed class RelativeDays with _$RelativeDays implements RelativeDate {
       _RelativeDaysHours;
 
   @Assert('hour >= 0 && hour < 60')
-  @Assert('minute >= 0 && minute < 60')
+  @Assert('minute == null || (minute >= 0 && minute < 60)')
   const factory RelativeDays.hour(
     int days,
     int hour, [
-    @Default(0) int minute,
+    int? minute,
   ]) = _RelativeDaysHour;
 
   const RelativeDays._();
@@ -96,13 +96,13 @@ sealed class RelativeWeeks with _$RelativeWeeks implements RelativeDate {
       _RelativeWeeksDays;
 
   @Assert('weekDay >= DateTime.monday && weekDay <= DateTime.sunday')
-  @Assert('hour >= 0 && hour < 60')
-  @Assert('minute >= 0 && minute < 60')
+  @Assert('hour == null || (hour >= 0 && hour < 60)')
+  @Assert('minute == null || (minute >= 0 && minute < 60)')
   const factory RelativeWeeks.weekDay(
     int weeks,
     int weekDay, [
-    @Default(0) int hour,
-    @Default(0) int minute,
+    int? hour,
+    int? minute,
   ]) = _RelativeWeeksDay;
 
   const RelativeWeeks._();
@@ -123,12 +123,16 @@ sealed class RelativeWeeks with _$RelativeWeeks implements RelativeDate {
 
   static DateTime _applyWdHM(
     DateTime dateTime,
-    int weekDay,
-    int hour,
-    int minute,
+    int? weekDay,
+    int? hour,
+    int? minute,
   ) =>
       dateTime
-          .add(Duration(days: weekDay - dateTime.weekday))
+          .add(
+            weekDay != null
+                ? Duration(days: weekDay - dateTime.weekday)
+                : Duration.zero,
+          )
           .copyWith(hour: hour, minute: minute);
 }
 
@@ -140,13 +144,13 @@ sealed class RelativeMonths with _$RelativeMonths implements RelativeDate {
       _RelativeMonthsWeeks;
 
   @Assert('monthDay >= 1 && monthDay <= 31')
-  @Assert('hour >= 0 && hour < 60')
-  @Assert('minute >= 0 && minute < 60')
+  @Assert('hour == null || (hour >= 0 && hour < 60)')
+  @Assert('minute == null || (minute >= 0 && minute < 60)')
   const factory RelativeMonths.monthDay(
     int months,
     int monthDay, [
-    @Default(0) int hour,
-    @Default(0) int minute,
+    int? hour,
+    int? minute,
   ]) = _RelativeMonthsDay;
 
   const RelativeMonths._();
@@ -164,10 +168,16 @@ sealed class RelativeMonths with _$RelativeMonths implements RelativeDate {
           ),
       };
 
-  static DateTime _applyMdHM(DateTime dt, int md, int h, int m) => dt.copyWith(
-        day: min(md, dt.daysInMonth),
-        hour: h,
-        minute: m,
+  static DateTime _applyMdHM(
+    DateTime dateTime,
+    int? monthDay,
+    int? hour,
+    int? minute,
+  ) =>
+      dateTime.copyWith(
+        day: monthDay != null ? min(monthDay, dateTime.daysInMonth) : null,
+        hour: hour,
+        minute: minute,
       );
 }
 
@@ -179,27 +189,30 @@ sealed class RelativeYears with _$RelativeYears implements RelativeDate {
       _RelativeYearsMonths;
 
   @Assert('month >= DateTime.january && month <= DateTime.december')
-  @Assert('monthDay >= 1 && monthDay <= 31')
-  @Assert('hour >= 0 && hour < 60')
-  @Assert('minute >= 0 && minute < 60')
+  @Assert('monthDay == null || (monthDay >= 1 && monthDay <= 31)')
+  @Assert('hour == null || (hour >= 0 && hour < 60)')
+  @Assert('minute == null || (minute >= 0 && minute < 60)')
   const factory RelativeYears.month(
     int years,
     int month, [
-    @Default(1) int monthDay,
-    @Default(0) int hour,
-    @Default(0) int minute,
+    int? monthDay,
+    int? hour,
+    int? minute,
   ]) = _RelativeYearsMonth;
 
   @Assert('week >= 1 && week <= 52')
-  @Assert('weekDay >= DateTime.monday && weekDay <= DateTime.sunday')
-  @Assert('hour >= 0 && hour < 60')
-  @Assert('minute >= 0 && minute < 60')
+  @Assert(
+    'weekDay == null || '
+    '(weekDay >= DateTime.monday && weekDay <= DateTime.sunday)',
+  )
+  @Assert('hour == null || (hour >= 0 && hour < 60)')
+  @Assert('minute == null || (minute >= 0 && minute < 60)')
   const factory RelativeYears.week(
     int years,
     int week, [
-    @Default(DateTime.monday) int weekDay,
-    @Default(0) int hour,
-    @Default(0) int minute,
+    int? weekDay,
+    int? hour,
+    int? minute,
   ]) = _RelativeYearsWeek;
 
   const RelativeYears._();
@@ -227,9 +240,9 @@ sealed class RelativeYears with _$RelativeYears implements RelativeDate {
   static DateTime _applyWWdHM(
     DateTime dateTime,
     int week,
-    int weekDay,
-    int hour,
-    int minute,
+    int? weekDay,
+    int? hour,
+    int? minute,
   ) {
     final firstWeekDay = DateTime(dateTime.year).weekday;
     final firstWeekDate = switch (firstWeekDay) {
