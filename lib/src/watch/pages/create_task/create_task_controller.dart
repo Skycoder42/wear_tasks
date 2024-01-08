@@ -7,7 +7,6 @@ import '../../../common/extensions/core_extensions.dart';
 import '../../models/task.dart';
 import '../../models/task_recurrence.dart';
 import '../../repositories/settings.dart';
-import 'collection_selection/active_collection.dart';
 import 'collection_selection/collection_infos.dart';
 
 part 'create_task_controller.freezed.dart';
@@ -29,20 +28,21 @@ class CreateTaskState with _$CreateTaskState {
 class CreateTaskController extends _$CreateTaskController {
   @override
   Future<CreateTaskState> build() async {
-    final collectionInfos = await ref.watch(collectionInfosProvider.future);
-    final activeCollection = await ref.watch(activeCollectionProvider.future);
+    final collectionInfos = await ref.read(collectionInfosProvider.future);
     final settings = await ref.watch(settingsProvider.future);
 
-    final now = DateTime.now();
+    final today = DateTime.now().date;
     final defaultTime = settings.defaultTime;
     final initialDueDate = defaultTime.toDateTime(
-      DateTime(now.year, now.month, now.day + 1),
+      today.add(const Duration(days: 1)),
     );
 
     return CreateTaskState(
       initialDueDate: initialDueDate,
       collectionInfos: collectionInfos,
-      currentCollection: activeCollection,
+      currentCollection: collectionInfos
+          .whereOrFirst((i) => i.uid == settings.etebase.defaultCollection)
+          .uid,
       currentDueDate: initialDueDate,
     );
   }
@@ -61,6 +61,9 @@ class CreateTaskController extends _$CreateTaskController {
         ),
       );
 
-  Future<void> updateCollection(String uid) =>
-      ref.read(activeCollectionProvider.notifier).setActive(uid);
+  Future<void> updateCollection(String uid) => update(
+        (state) => state.copyWith(
+          currentCollection: uid,
+        ),
+      );
 }

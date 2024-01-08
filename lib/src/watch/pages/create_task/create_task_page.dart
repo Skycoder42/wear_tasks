@@ -174,7 +174,8 @@ class CreateTaskPage extends HookConsumerWidget {
     final task = Task(
       collectionUid: collectionUid,
       taskUid: ref.read(uuidProvider).v4(),
-      createdAt: dueDate,
+      createdAt: DateTime.now(),
+      dueDate: dueDate,
       recurrence: recurrence,
       summary: summary,
       priority: priority,

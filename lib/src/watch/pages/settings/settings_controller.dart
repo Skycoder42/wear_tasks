@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../common/extensions/core_extensions.dart';
 import '../../repositories/settings.dart';
-import '../create_task/collection_selection/active_collection.dart';
 import '../create_task/collection_selection/collection_infos.dart';
 
 part 'settings_controller.freezed.dart';
@@ -30,12 +30,13 @@ class SettingsController extends _$SettingsController {
   @override
   Future<SettingsState> build() async {
     final collectionInfos = await ref.watch(collectionInfosProvider.future);
-    final activeCollection = await ref.watch(activeCollectionProvider.future);
     final settings = await ref.watch(settingsProvider.future);
 
     return SettingsState(
       collectionInfos: collectionInfos,
-      activeCollectionUid: activeCollection,
+      activeCollectionUid: collectionInfos
+          .whereOrFirst((i) => i.uid == settings.etebase.defaultCollection)
+          .uid,
       defaultTime: settings.defaultTime,
     );
   }
@@ -48,11 +49,8 @@ class SettingsController extends _$SettingsController {
       });
 
   Future<void> updateDefaultCollection(String uid) => update((state) async {
-        final activeCollection = ref.watch(activeCollectionProvider.notifier);
         final settings = await ref.watch(settingsProvider.future);
         await settings.etebase.setDefaultCollection(uid);
-        await activeCollection.setActive(uid);
-
         return state.copyWith(activeCollectionUid: uid);
       });
 }

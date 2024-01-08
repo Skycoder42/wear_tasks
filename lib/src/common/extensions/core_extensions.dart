@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 extension DateTimeX on DateTime {
@@ -23,4 +24,11 @@ extension TimeOfDayX on TimeOfDay {
         hour,
         minute,
       );
+}
+
+extension ListX<T> on List<T> {
+  T whereOrFirst(bool Function(T) filter) {
+    final value = firstWhereOrNull(filter);
+    return value ?? first;
+  }
 }
