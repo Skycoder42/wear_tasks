@@ -83,7 +83,7 @@
   "login_page_invalid": "Incomplete form",
   "login_page_succeeded": "Login successful!",
   "home_page_create_task": "Create Task",
-  "home_page_retry_uploads": "Uploading pending",
+  "home_page_retry_uploads": "Upload pending",
   "create_task_page_summary_label": "Summary",
   "create_task_page_description_label": "Description",
   "date_picker_day": "{date}.",

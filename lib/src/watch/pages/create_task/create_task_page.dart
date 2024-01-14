@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../common/extensions/riverpod_extensions.dart';
@@ -27,12 +30,22 @@ class CreateTaskPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final focusNode = useFocusNode();
     final state = ref.watch(createTaskControllerProvider);
     final createTaskState = ref.watch(createTaskServiceProvider);
     final isProcessing = state.isLoading || createTaskState.isSaving;
 
     ref
       ..listenForErrors(context, createTaskControllerProvider)
+      ..listen(
+        createTaskControllerProvider.select((s) => s.hasValue),
+        (_, hasValue) => Future(() async {
+          if (hasValue) {
+            await Future.delayed(const Duration(milliseconds: 100));
+            focusNode.requestFocus();
+          }
+        }),
+      )
       ..listen(createTaskServiceProvider, (_, state) {
         switch (state) {
           case CreateTaskSavedState(didUpload: true):
@@ -111,6 +124,7 @@ class CreateTaskPage extends HookConsumerWidget {
                 children: [
                   TextFormField(
                     enabled: !isProcessing,
+                    focusNode: focusNode,
                     decoration: InputDecoration(
                       alignLabelWithHint: true,
                       label:
