@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../common/extensions/riverpod_extensions.dart';
 import '../../../common/localization/localization.dart';
 import '../../app/router/watch_router.dart';
 import '../../app/watch_theme.dart';
 import '../../models/task_recurrence.dart';
 import '../../widgets/watch_dialog.dart';
 import '../date_time_picker/date_time_picker_page.dart';
+import 'task_due_selection_controller.dart';
 
 class TaskDueSelectionPage extends HookConsumerWidget {
   final DateTime initialDateTime;
@@ -22,14 +24,18 @@ class TaskDueSelectionPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final taskDueSelectionState = ref.watch(taskDueSelectionControllerProvider);
     final currentDateTime = useState(
       initialDateTime.copyWith(second: 0, millisecond: 0, microsecond: 0),
     );
     final currentRecurrence = useState<TaskRecurrence?>(initialRecurrence);
 
+    ref.listenForErrors(context, taskDueSelectionControllerProvider);
+
     return WatchDialog<(DateTime, TaskRecurrence?)>(
       horizontalSafeArea: true,
       onAccept: () => (currentDateTime.value, currentRecurrence.value),
+      loadingOverlayActive: taskDueSelectionState is AsyncLoading,
       body: ListView(
         children: [
           const SizedBox(width: double.infinity),
@@ -73,7 +79,6 @@ class TaskDueSelectionPage extends HookConsumerWidget {
               },
             ),
           ),
-          // TODO use selectable component (chip maybe?)
           Center(
             child: IconButton(
               color: currentRecurrence.value != null
@@ -91,8 +96,26 @@ class TaskDueSelectionPage extends HookConsumerWidget {
               },
             ),
           ),
-          const Divider(),
-          // TODO predefined Expressions
+          if (taskDueSelectionState
+              case AsyncData(
+                value: TaskDueSelectionState(
+                  expressions: final expressions,
+                  defaultTime: final defaultTime,
+                )
+              ) when expressions.isNotEmpty) ...[
+            const Divider(),
+            for (final expression in expressions)
+              ListTile(
+                title: Text(expression.description(context.strings)),
+                onTap: () => Navigator.pop(
+                  context,
+                  (
+                    expression.apply(DateTime.now(), defaultTime),
+                    expression.recurrence,
+                  ),
+                ),
+              ),
+          ],
         ],
       ),
     );
