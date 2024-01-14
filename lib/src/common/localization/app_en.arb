@@ -144,6 +144,9 @@
   "create_task_page_success_message": "Task created!",
   "create_task_page_upload_failed_message": "Task upload failed!",
   "error_not_logged_in": "Not logged in",
+  "expression_in_1_hour": "In 1 hour",
+  "expression_this_evening": "This evening",
   "expression_tomorrow": "Tomorrow",
-  "expression_next_week": "Next Week"
+  "expression_next_week": "Next Week",
+  "expression_next_month": "Next month"
 }
