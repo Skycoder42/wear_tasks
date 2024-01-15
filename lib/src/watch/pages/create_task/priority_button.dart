@@ -107,21 +107,3 @@ class PriorityButton extends HookConsumerWidget {
       );
   }
 }
-
-extension on TaskPriority {
-  Icon get icon => switch (this) {
-        TaskPriority.none => const Icon(Icons.notifications_off),
-        TaskPriority.low => const Icon(
-            Icons.notifications,
-            color: Colors.blue,
-          ),
-        TaskPriority.medium => const Icon(
-            Icons.notifications_active,
-            color: Colors.orange,
-          ),
-        TaskPriority.high => const Icon(
-            Icons.notification_important,
-            color: Colors.red,
-          ),
-      };
-}

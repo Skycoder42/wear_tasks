@@ -26,7 +26,7 @@ class TaskDueSelectionController extends _$TaskDueSelectionController {
 
     return TaskDueSelectionState(
       expressions: await repo.loadExpressions().toList(),
-      defaultTime: settings.defaultTime,
+      defaultTime: settings.tasks.defaultTime,
     );
   }
 }

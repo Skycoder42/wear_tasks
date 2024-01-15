@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:settings_annotation/settings_annotation.dart';
 
 import '../../common/utils/shared_preferences.dart';
+import '../models/task.dart';
 
 part 'settings.g.dart';
 
@@ -21,14 +22,24 @@ abstract class Settings with _$Settings {
 
   HiveSettings get hive;
 
-  EtebaseSettings get etebase;
+  AccountSettings get account;
 
+  TaskSettings get tasks;
+}
+
+@SettingsGroup()
+abstract class TaskSettings with _$TaskSettings {
   @SettingsEntry(
     defaultValue: LiteralDefault('const TimeOfDay(hour: 9, minute: 0)'),
     fromSettings: _timeOfDayFromSettings,
     toSettings: _timeOfDayToSettings,
   )
   TimeOfDay get defaultTime;
+
+  @SettingsEntry(defaultValue: TaskPriority.none)
+  TaskPriority get defaultPriority;
+
+  String? get defaultCollection;
 
   static TimeOfDay _timeOfDayFromSettings(int value) {
     final d = Duration(minutes: value);
@@ -54,7 +65,7 @@ abstract class HiveSettings with _$HiveSettings {
 }
 
 @SettingsGroup()
-abstract class EtebaseSettings with _$EtebaseSettings {
+abstract class AccountSettings with _$AccountSettings {
   String? get accountData;
 
   @SettingsEntry(
@@ -62,8 +73,6 @@ abstract class EtebaseSettings with _$EtebaseSettings {
     toSettings: _uriToSettings,
   )
   Uri? get serverUrl;
-
-  String? get defaultCollection;
 
   static Uri _uriFromSettings(String value) => Uri.parse(value);
   static String _uriToSettings(Uri uri) => uri.toString();

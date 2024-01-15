@@ -32,7 +32,7 @@ class CreateTaskController extends _$CreateTaskController {
     final settings = await ref.watch(settingsProvider.future);
 
     final today = DateTime.now().date;
-    final defaultTime = settings.defaultTime;
+    final defaultTime = settings.tasks.defaultTime;
     final initialDueDate = defaultTime.toDateTime(
       today.add(const Duration(days: 1)),
     );
@@ -41,7 +41,7 @@ class CreateTaskController extends _$CreateTaskController {
       initialDueDate: initialDueDate,
       collectionInfos: collectionInfos,
       currentCollection: collectionInfos
-          .whereOrFirst((i) => i.uid == settings.etebase.defaultCollection)
+          .whereOrFirst((i) => i.uid == settings.tasks.defaultCollection)
           .uid,
       currentDueDate: initialDueDate,
     );

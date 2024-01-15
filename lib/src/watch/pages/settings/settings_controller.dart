@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../common/extensions/core_extensions.dart';
+import '../../models/task.dart';
 import '../../repositories/settings.dart';
 import '../create_task/collection_selection/collection_infos.dart';
 
@@ -14,14 +15,15 @@ part 'settings_controller.g.dart';
 class SettingsState with _$SettingsState {
   const factory SettingsState({
     required List<CollectionInfo> collectionInfos,
-    required String activeCollectionUid,
+    required String defaultCollection,
     required TimeOfDay defaultTime,
+    required TaskPriority defaultPriority,
   }) = _SettingsState;
 
   const SettingsState._();
 
-  CollectionInfo get activeCollectionInfo =>
-      collectionInfos.singleWhereOrNull((e) => e.uid == activeCollectionUid) ??
+  CollectionInfo get defaultCollectionInfo =>
+      collectionInfos.singleWhereOrNull((e) => e.uid == defaultCollection) ??
       collectionInfos.first;
 }
 
@@ -34,23 +36,30 @@ class SettingsController extends _$SettingsController {
 
     return SettingsState(
       collectionInfos: collectionInfos,
-      activeCollectionUid: collectionInfos
-          .whereOrFirst((i) => i.uid == settings.etebase.defaultCollection)
+      defaultCollection: collectionInfos
+          .whereOrFirst((i) => i.uid == settings.tasks.defaultCollection)
           .uid,
-      defaultTime: settings.defaultTime,
+      defaultTime: settings.tasks.defaultTime,
+      defaultPriority: settings.tasks.defaultPriority,
     );
   }
 
-  Future<void> updateDefaultTime(TimeOfDay defaultTime) =>
-      update((state) async {
-        final settings = await ref.watch(settingsProvider.future);
-        await settings.setDefaultTime(defaultTime);
-        return state.copyWith(defaultTime: defaultTime);
-      });
-
   Future<void> updateDefaultCollection(String uid) => update((state) async {
         final settings = await ref.watch(settingsProvider.future);
-        await settings.etebase.setDefaultCollection(uid);
-        return state.copyWith(activeCollectionUid: uid);
+        await settings.tasks.setDefaultCollection(uid);
+        return state.copyWith(defaultCollection: uid);
+      });
+
+  Future<void> updateDefaultTime(TimeOfDay timeOfDay) => update((state) async {
+        final settings = await ref.watch(settingsProvider.future);
+        await settings.tasks.setDefaultTime(timeOfDay);
+        return state.copyWith(defaultTime: timeOfDay);
+      });
+
+  Future<void> updateDefaultPriority(TaskPriority priority) =>
+      update((state) async {
+        final settings = await ref.watch(settingsProvider.future);
+        await settings.tasks.setDefaultPriority(priority);
+        return state.copyWith(defaultPriority: priority);
       });
 }

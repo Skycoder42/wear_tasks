@@ -30,13 +30,13 @@ class AccountService extends _$AccountService {
   Future<EtebaseAccount?> build() async {
     _logger.fine('Restoring account');
     final settings = await ref.watch(settingsProvider.future);
-    final accountData = settings.etebase.accountData;
+    final accountData = settings.account.accountData;
     if (accountData == null) {
       _logger.info('No account data in secure storage');
       return null;
     }
 
-    final serverUrl = settings.etebase.serverUrl;
+    final serverUrl = settings.account.serverUrl;
     _logger.fine('Creating client for server: $serverUrl');
     final client = await ref.watch(etebaseClientProvider(serverUrl).future);
     _logger.fine('Restoring account from persisted data');
@@ -66,7 +66,7 @@ class AccountService extends _$AccountService {
         account = await EtebaseAccount.login(client, username, password);
 
         _logger.fine('Persisting account data to secure storage');
-        await settings.etebase.setAccountData(await account.save());
+        await settings.account.setAccountData(await account.save());
 
         _logger.info('Successfully logged in');
         ref.onDispose(account.dispose);
@@ -87,8 +87,8 @@ class AccountService extends _$AccountService {
 
     _logger.fine('Deleting account data from secure storage');
     final settings = await ref.read(settingsProvider.future);
-    await settings.etebase.removeAccountData();
-    await settings.etebase.removeServerUrl();
+    await settings.account.removeAccountData();
+    await settings.account.removeServerUrl();
 
     _logger.fine('Invalidating provider');
     ref.invalidateSelf();
