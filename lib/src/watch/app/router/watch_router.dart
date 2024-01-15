@@ -7,6 +7,7 @@ import '../../pages/create_task/create_task_page.dart';
 import '../../pages/date_time_picker/date_time_picker_page.dart';
 import '../../pages/home/home_page.dart';
 import '../../pages/login/login_page.dart';
+import '../../pages/login/logout_page.dart';
 import '../../pages/settings/settings_page.dart';
 import '../../pages/task_due_selection/recurrence_picker_page.dart';
 import '../../pages/task_due_selection/task_due_selection_page.dart';

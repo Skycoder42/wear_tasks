@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -7,7 +8,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'side_button.dart';
 import 'watch_scaffold.dart';
 
-typedef ValueCallback<T> = T Function();
+typedef ValueCallback<T> = FutureOr<T> Function();
 
 class WatchDialog<T> extends HookWidget {
   static const animationDuration = Duration(milliseconds: 250);
@@ -102,13 +103,14 @@ class WatchDialog<T> extends HookWidget {
       SideButton(
         filled: true,
         icon: const Icon(Icons.check),
-        onPressed:
-            isPageValid ? () => Navigator.pop(context, onAccept()) : null,
+        onPressed: isPageValid
+            ? () async => Navigator.pop(context, await onAccept())
+            : null,
       );
 
   SideButton _buildRejectButton(BuildContext context) => SideButton(
         icon: const Icon(Icons.close),
-        onPressed: () => Navigator.pop(context, onReject?.call()),
+        onPressed: () async => Navigator.pop(context, await onReject?.call()),
       );
 
   Widget _buildNextButton(PageController pageController, bool isPageValid) =>

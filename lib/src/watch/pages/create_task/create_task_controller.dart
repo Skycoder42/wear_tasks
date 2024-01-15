@@ -18,9 +18,9 @@ class CreateTaskState with _$CreateTaskState {
     required DateTime initialDueDate,
     required List<CollectionInfo> collectionInfos,
     required String currentCollection,
+    required TaskPriority currentPriority,
     required DateTime currentDueDate,
     TaskRecurrence? currentRecurrence,
-    @Default(TaskPriority.none) TaskPriority currentPriority,
   }) = _CreateTaskState;
 }
 
@@ -43,6 +43,7 @@ class CreateTaskController extends _$CreateTaskController {
       currentCollection: collectionInfos
           .whereOrFirst((i) => i.uid == settings.tasks.defaultCollection)
           .uid,
+      currentPriority: settings.tasks.defaultPriority,
       currentDueDate: initialDueDate,
     );
   }

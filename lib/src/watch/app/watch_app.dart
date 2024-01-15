@@ -29,7 +29,7 @@ class WatchApp extends ConsumerWidget {
 
         // app configuration
         builder: (context, child) {
-          WatchProviderScope.updateLocalizations(context);
+          WatchProviderScope.of(context).updateLocalizations(context.strings);
 
           final mediaQuery = MediaQuery.of(context);
           final diameter = min(mediaQuery.size.width, mediaQuery.size.height);

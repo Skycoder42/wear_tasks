@@ -14,18 +14,25 @@ class WatchProviderScope extends StatefulWidget {
   });
 
   @override
-  State<WatchProviderScope> createState() => _WatchProviderScopeState();
+  State<WatchProviderScope> createState() => WatchProviderScopeState();
 
-  static void updateLocalizations(BuildContext context) => context
-      .findAncestorStateOfType<_WatchProviderScopeState>()
-      ?._updateLocalizations(context.strings);
+  static WatchProviderScopeState of(BuildContext context) =>
+      context.findAncestorStateOfType<WatchProviderScopeState>()!;
 }
 
-class _WatchProviderScopeState extends State<WatchProviderScope> {
+class WatchProviderScopeState extends State<WatchProviderScope> {
+  late GlobalKey _scopeKey;
   AppLocalizations? _localizations;
 
   @override
+  void initState() {
+    super.initState();
+    _scopeKey = GlobalKey();
+  }
+
+  @override
   Widget build(BuildContext context) => ProviderScope(
+        key: _scopeKey,
         overrides: [
           if (_localizations != null)
             appLocalizationsProvider.overrideWith((_) => _localizations!)
@@ -35,10 +42,15 @@ class _WatchProviderScopeState extends State<WatchProviderScope> {
         child: widget.child,
       );
 
-  void _updateLocalizations(AppLocalizations localizations) =>
-      scheduleMicrotask(
+  void updateLocalizations(AppLocalizations localizations) => scheduleMicrotask(
         () => setState(() {
           _localizations = localizations;
+        }),
+      );
+
+  void resetApp() => scheduleMicrotask(
+        () => setState(() {
+          _scopeKey = GlobalKey();
         }),
       );
 }

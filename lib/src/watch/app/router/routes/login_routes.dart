@@ -14,3 +14,12 @@ class LoginRoute extends GoRouteData {
         redirectTo: redirectTo,
       );
 }
+
+@TypedGoRoute<LogoutRoute>(path: '/logout')
+@immutable
+class LogoutRoute extends GoRouteData {
+  const LogoutRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const LogoutPage();
+}

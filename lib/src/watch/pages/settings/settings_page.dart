@@ -88,10 +88,7 @@ class SettingsPage extends HookConsumerWidget {
           ListTile(
             leading: const Icon(Icons.logout),
             title: Text(context.strings.settings_page_logout),
-            onTap: () => showDialog(
-              context: context,
-              builder: (context) => const AlertDialog(),
-            ),
+            onTap: () async => const LogoutRoute().push(context),
           ),
           // TODO add expressions configuration here?
           Offstage(

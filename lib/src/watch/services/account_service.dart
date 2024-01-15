@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../common/providers/etebase_provider.dart';
+import '../../common/providers/hive_provider.dart';
 import '../repositories/settings.dart';
 
 part 'account_service.g.dart';
@@ -85,10 +86,13 @@ class AccountService extends _$AccountService {
     _logger.fine('Logging out of previous account, if present');
     await future.then((account) async => account?.logout(), onError: (_) {});
 
-    _logger.fine('Deleting account data from secure storage');
+    _logger.fine('Deleting all locally persisted tasks and collections');
+    final hive = await ref.read(hiveProvider.future);
+    await hive.deleteFromDisk();
+
+    _logger.fine('Deleting all data from secure storage');
     final settings = await ref.read(settingsProvider.future);
-    await settings.account.removeAccountData();
-    await settings.account.removeServerUrl();
+    await settings.clear();
 
     _logger.fine('Invalidating provider');
     ref.invalidateSelf();

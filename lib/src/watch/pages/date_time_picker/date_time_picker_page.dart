@@ -53,7 +53,7 @@ class DateTimePickerPage extends HookConsumerWidget {
           },
         ),
       ),
-      onAccept: () => ref.read(_controllerProvider),
+      onAccept: () => ref.read<DateTime>(_controllerProvider),
       pages: [
         if (mode.hasDate) DatePicker(initialDateTime),
         if (mode.hasTime) TimePicker(initialDateTime),
