@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../background/tasks/task_manager.dart';
 import '../models/task.dart';
 import '../repositories/item_repository.dart';
 import 'task_factory.dart';
@@ -47,6 +48,11 @@ class CreateTaskService extends _$CreateTaskService {
         ),
         calendar,
       );
+
+      if (!didUpload) {
+        final taskManager = await ref.watch(taskManagerProvider.future);
+        await taskManager.registerSyncTask();
+      }
 
       state = CreateTaskState.saved(didUpload);
 

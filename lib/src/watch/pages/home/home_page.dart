@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../background/tasks/task_manager.dart';
 import '../../../common/extensions/riverpod_extensions.dart';
 import '../../../common/localization/localization.dart';
 import '../../app/router/watch_router.dart';
@@ -14,7 +15,14 @@ class HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.listenForErrors(context, retryUploadsServiceProvider);
+    ref
+      ..listenForErrors(context, retryUploadsServiceProvider)
+      ..listen(retryUploadsServiceProvider, (_, next) async {
+        if (next case AsyncData(value: AllUploadedRetryState())) {
+          final taskManager = await ref.read(taskManagerProvider.future);
+          await taskManager.clearSyncTask();
+        }
+      });
 
     return WatchScaffold(
       horizontalSafeArea: true,

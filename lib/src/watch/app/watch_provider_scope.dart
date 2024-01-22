@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../background/workmanager.dart';
 import '../../common/localization/localization.dart';
 
 class WatchProviderScope extends StatefulWidget {
@@ -39,7 +40,13 @@ class WatchProviderScopeState extends State<WatchProviderScope> {
           else
             appLocalizationsProvider,
         ],
-        child: widget.child,
+        child: Consumer(
+          builder: (context, ref, child) {
+            ref.watch(workmanagerProvider);
+            return child!;
+          },
+          child: widget.child,
+        ),
       );
 
   void updateLocalizations(AppLocalizations localizations) => scheduleMicrotask(

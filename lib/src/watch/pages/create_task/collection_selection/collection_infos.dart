@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:etebase_flutter/etebase_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../background/tasks/task_manager.dart';
 import '../../../../common/localization/localization.dart';
 import '../../../../common/providers/package_info_provider.dart';
 import '../../../../common/utils/hex_color.dart';
@@ -54,7 +55,13 @@ class CollectionInfos extends _$CollectionInfos {
       color: WatchTheme.appColor.toHexString(),
       mtime: DateTime.now(),
     );
-    final uid = await repository.create(metadata);
+    final (uid: uid, didUpload: didUpload) = await repository.create(metadata);
+
+    if (!didUpload) {
+      final taskManager = await ref.watch(taskManagerProvider.future);
+      await taskManager.registerSyncTask();
+    }
+
     return _createInfo(uid, metadata);
   }
 

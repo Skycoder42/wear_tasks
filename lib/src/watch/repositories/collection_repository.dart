@@ -104,7 +104,9 @@ class CollectionRepository with RepositoryMixin {
     }
   }
 
-  Future<String> create(EtebaseItemMetadata metadata) async {
+  Future<({String uid, bool didUpload})> create(
+    EtebaseItemMetadata metadata,
+  ) async {
     final collection = await _collectionManager.create(
       _tasksCollectionType,
       metadata,
@@ -112,9 +114,11 @@ class CollectionRepository with RepositoryMixin {
     );
 
     final uid = await collection.getUid();
+    var didUpload = false;
     await _updateCache(uid, collection, needsUpload: true);
     try {
       await _collectionManager.upload(collection);
+      didUpload = true;
       await _collectionStorage.save(uid, collection);
 
       // ignore: avoid_catches_without_on_clauses
@@ -125,7 +129,7 @@ class CollectionRepository with RepositoryMixin {
       }
     }
 
-    return uid;
+    return (uid: uid, didUpload: didUpload);
   }
 
   Future<bool> hasPendingUploads() => _collectionStorage.hasPendingUploads();
