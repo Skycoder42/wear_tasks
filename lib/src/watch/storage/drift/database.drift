@@ -1,0 +1,17 @@
+CREATE TABLE StoredCollections (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "data" BLOB NOT NULL,
+    "pendingUpload" BOOLEAN NOT NULL DEFAULT(false)
+) STRICT;
+
+CREATE TABLE StoredItems(
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "data" BLOB NOT NULL,
+  "collectionId" TEXT NOT NULL REFERENCES StoredCollections(id)
+) STRICT;
+
+hasPendingUploads:
+  SELECT COUNT(StoredCollections.pendingUpload) > 0 FROM StoredCollections
+  LEFT JOIN StoredItems ON StoredCollections.id = StoredItems.collectionId
+  GROUP BY StoredCollections.id
+  HAVING COUNT(StoredItems.id) > 0 OR StoredCollections.pendingUpload;
