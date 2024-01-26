@@ -5,6 +5,7 @@
     "etebase",
     "ical",
     "icalendar",
+    "sqlite",
     "stoken",
     "stringifier",
     "vtodo",

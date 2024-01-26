@@ -10,8 +10,29 @@ CREATE TABLE StoredItems(
   "collectionId" TEXT NOT NULL REFERENCES StoredCollections(id)
 ) STRICT;
 
+pendingCollectionUploads:
+  SELECT id, data
+  FROM StoredCollections
+  WHERE pendingUpload;
+
 hasPendingUploads:
-  SELECT COUNT(StoredCollections.pendingUpload) > 0 FROM StoredCollections
-  LEFT JOIN StoredItems ON StoredCollections.id = StoredItems.collectionId
-  GROUP BY StoredCollections.id
-  HAVING COUNT(StoredItems.id) > 0 OR StoredCollections.pendingUpload;
+  SELECT COUNT(*) FROM(
+    SELECT c.id
+    FROM StoredCollections AS c
+    LEFT JOIN StoredItems AS i ON c.id = i.collectionId
+    GROUP BY c.id
+    HAVING COUNT(i.id) > 0 OR c.pendingUpload
+  );
+
+markCollectionUploaded:
+  UPDATE StoredCollections
+  SET pendingUpload = false
+  WHERE id = :id;
+
+pendingItemUploads:
+  SELECT id, data
+  FROM StoredItems;
+
+markItemUploaded:
+  DELETE FROM StoredItems
+  WHERE id = :id;

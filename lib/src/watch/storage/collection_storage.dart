@@ -1,12 +1,9 @@
 import 'package:etebase_flutter/etebase_flutter.dart';
-import 'package:hive/hive.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../common/providers/hive_provider.dart';
 import '../../watch/services/account_service.dart';
-import 'hive/hive_extensions.dart';
-import 'hive/stored_collection.dart';
+import 'drift/database.dart';
 
 part 'collection_storage.g.dart';
 
@@ -25,14 +22,28 @@ Future<CollectionStorage> collectionStorage(CollectionStorageRef ref) async {
 
 class CollectionStorage {
   final EtebaseCollectionManager _collectionManager;
-  final LazyBox<StoredCollection> _cacheBox;
+  final AppDatabase _database;
   final _logger = Logger('$CollectionStorage');
 
-  CollectionStorage(this._collectionManager, this._cacheBox);
+  CollectionStorage(this._collectionManager, this._database);
 
-  Stream<EtebaseCollection> loadAll() => _loadAll();
+  Stream<EtebaseCollection> loadAll() async* {
+    final collections =
+        await _database.select(_database.storedCollections).get();
+    for (final collection in collections) {
+      yield await _collectionManager.cacheLoad(collection.data);
+    }
+  }
 
-  Future<EtebaseCollection?> load(String uid) => _load(uid);
+  Future<EtebaseCollection?> load(String uid) async {
+    final collection = await (_database.select(_database.storedCollections)
+          ..where((tbl) => tbl.id.equals(uid)))
+        .getSingleOrNull();
+
+    return collection != null
+        ? _collectionManager.cacheLoad(collection.data)
+        : null;
+  }
 
   Future<bool> hasPendingUploads() async {
     for (final uid in _cacheBox.keys.cast<String>()) {
@@ -120,22 +131,5 @@ class CollectionStorage {
 
     _logger.finest('Found collection $uid');
     return _collectionManager.cacheLoad(collection.data);
-  }
-
-  Stream<EtebaseCollection> _loadAll({
-    bool pendingUpdateOnly = false,
-  }) async* {
-    _logger.finest(
-      'List all collections '
-      '${pendingUpdateOnly ? 'with pending uploads ' : ''}'
-      'from storage',
-    );
-
-    for (final uid in _cacheBox.keys.cast<String>()) {
-      final collection = await _load(uid, pendingUpdateOnly: pendingUpdateOnly);
-      if (collection != null) {
-        yield collection;
-      }
-    }
   }
 }

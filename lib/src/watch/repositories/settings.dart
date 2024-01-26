@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:settings_annotation/settings_annotation.dart';
@@ -20,7 +18,7 @@ Future<Settings> settings(SettingsRef ref) async => Settings(
 abstract class Settings with _$Settings {
   factory Settings(SharedPreferences sharedPreferences) = _$SettingsImpl;
 
-  HiveSettings get hive;
+  SqlSettings get sql;
 
   AccountSettings get account;
 
@@ -53,15 +51,8 @@ abstract class TaskSettings with _$TaskSettings {
 }
 
 @SettingsGroup()
-abstract class HiveSettings with _$HiveSettings {
-  @SettingsEntry(
-    fromSettings: _byteArrayFromSettings,
-    toSettings: _byteArrayToSettings,
-  )
-  List<int>? get cipherKey;
-
-  static List<int> _byteArrayFromSettings(String value) => base64.decode(value);
-  static String _byteArrayToSettings(List<int> value) => base64.encode(value);
+abstract class SqlSettings with _$SqlSettings {
+  String? get cipherPassphrase;
 }
 
 @SettingsGroup()
