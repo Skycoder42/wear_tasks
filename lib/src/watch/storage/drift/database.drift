@@ -7,16 +7,18 @@ CREATE TABLE StoredCollections (
 CREATE TABLE StoredItems(
   "id" TEXT NOT NULL PRIMARY KEY,
   "data" BLOB NOT NULL,
-  "collectionId" TEXT NOT NULL REFERENCES StoredCollections(id)
+  "collectionId" TEXT NOT NULL REFERENCES StoredCollections(id) ON DELETE CASCADE
 ) STRICT;
 
-pendingCollectionUploads:
-  SELECT id, data
-  FROM StoredCollections
-  WHERE pendingUpload;
+-- Collections
+listCollections: SELECT * FROM StoredCollections;
+
+listPendingCollections: SELECT * FROM StoredCollections WHERE pendingUpload;
+
+getCollection: SELECT * FROM StoredCollections WHERE id = :id;
 
 hasPendingUploads:
-  SELECT COUNT(*) FROM(
+  SELECT COUNT(*) > 0 FROM (
     SELECT c.id
     FROM StoredCollections AS c
     LEFT JOIN StoredItems AS i ON c.id = i.collectionId
@@ -24,15 +26,17 @@ hasPendingUploads:
     HAVING COUNT(i.id) > 0 OR c.pendingUpload
   );
 
-markCollectionUploaded:
-  UPDATE StoredCollections
-  SET pendingUpload = false
-  WHERE id = :id;
+saveCollection: INSERT OR REPLACE INTO StoredCollections $collection;
 
-pendingItemUploads:
-  SELECT id, data
-  FROM StoredItems;
+deleteCollection: DELETE FROM StoredCollections WHERE id = :id;
 
-markItemUploaded:
-  DELETE FROM StoredItems
-  WHERE id = :id;
+clearCollections: DELETE FROM StoredCollections;
+
+-- Items
+hasItems: SELECT COUNT(*) > 0 FROM StoredItems;
+
+listItems: SELECT * FROM StoredItems;
+
+saveItem: INSERT OR REPLACE INTO StoredItems $item;
+
+deleteItem: DELETE FROM StoredItems WHERE id = :id;

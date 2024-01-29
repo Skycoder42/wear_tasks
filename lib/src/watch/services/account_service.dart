@@ -2,8 +2,8 @@ import 'package:etebase_flutter/etebase_flutter.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../common/providers/app_database_provider.dart';
 import '../../common/providers/etebase_provider.dart';
-import '../../common/providers/hive_provider.dart';
 import '../repositories/settings.dart';
 
 part 'account_service.g.dart';
@@ -86,9 +86,10 @@ class AccountService extends _$AccountService {
     _logger.fine('Logging out of previous account, if present');
     await future.then((account) async => account?.logout(), onError: (_) {});
 
+    // TODO delete database file instead!
     _logger.fine('Deleting all locally persisted tasks and collections');
-    final hive = await ref.read(hiveProvider.future);
-    await hive.deleteFromDisk();
+    final database = await ref.read(appDatabaseProvider.future);
+    await database.clearCollections(); // cascade deletes items as well
 
     _logger.fine('Deleting all data from secure storage');
     final settings = await ref.read(settingsProvider.future);

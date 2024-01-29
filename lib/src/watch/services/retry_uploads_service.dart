@@ -25,7 +25,7 @@ class RetryUploadsService extends _$RetryUploadsService {
     await for (final uid in collectionRepository.listAll()) {
       final itemRepository =
           await ref.watch(itemRepositoryProvider(uid).future);
-      hasPending = hasPending || itemRepository.hasPendingUploads();
+      hasPending = hasPending || await itemRepository.hasPendingUploads();
     }
 
     return hasPending

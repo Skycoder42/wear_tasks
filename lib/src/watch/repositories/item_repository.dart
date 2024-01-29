@@ -67,7 +67,7 @@ class ItemRepository with RepositoryMixin {
     }
   }
 
-  bool hasPendingUploads() => _itemStorage.hasItems;
+  Future<bool> hasPendingUploads() => _itemStorage.hasItems;
 
   Future<void> retryPendingUploads() async {
     await for (final item in _itemStorage.loadAll()) {

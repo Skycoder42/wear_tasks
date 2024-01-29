@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:logging/logging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
@@ -18,16 +18,9 @@ part 'app_database_provider.g.dart';
 
 @Riverpod(keepAlive: true)
 Future<AppDatabase> appDatabase(AppDatabaseRef ref) async {
-  await _setupSqlite();
   final passphrase = await _getDatabasePassphrase(ref);
   final database = await _openDatabase(passphrase);
   return AppDatabase(database);
-}
-
-Future<void> _setupSqlite() async {
-  sqlite3.tempDirectory = (await getTemporaryDirectory()).path;
-  open.overrideFor(OperatingSystem.android, openCipherOnAndroid);
-  await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
 }
 
 Future<String> _getDatabasePassphrase(AppDatabaseRef ref) async {
@@ -44,22 +37,42 @@ Future<String> _getDatabasePassphrase(AppDatabaseRef ref) async {
 }
 
 Future<QueryExecutor> _openDatabase(String passphrase) async {
-  final logger = Logger('$AppDatabase');
+  // must be done here as method channels are not available in the isolate
+  await _setupSqlite();
 
   final dbFolder = await getApplicationSupportDirectory();
   final file = File.fromUri(dbFolder.uri.resolve('storage.db'));
-  final database = NativeDatabase.createInBackground(file);
 
-  final versionResult =
-      await database.runSelect('PRAGMA cipher_version;', const []);
+  return NativeDatabase.createInBackground(
+    file,
+    isolateSetup: _setupIsolate,
+    setup: (db) => _setupDatabase(db, passphrase),
+    logStatements: kDebugMode,
+  );
+}
+
+void _setupIsolate() {
+  open.overrideFor(OperatingSystem.android, openCipherOnAndroid);
+}
+
+Future<void> _setupSqlite() async {
+  _setupIsolate();
+  await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
+  sqlite3.tempDirectory = (await getTemporaryDirectory()).path;
+}
+
+void _setupDatabase(Database database, String passphrase) {
+  assert(_debugCheckSqlCipher(database), 'SQLCipher is not available!');
+
+  database.execute("PRAGMA key = '$passphrase';");
+}
+
+bool _debugCheckSqlCipher(Database database) {
+  final versionResult = database.select('PRAGMA cipher_version;');
   if (versionResult.isEmpty) {
-    throw StateError(
-      'SQLCipher library is not available, please check your dependencies!',
-    );
+    return false;
   }
-  logger.info('SQLCipher version: ${versionResult.first}');
-
-  await database.runCustom('PRAGMA key = ?;', [passphrase]);
-
-  return database;
+  // ignore: avoid_print
+  print('SQLCipher version: ${versionResult.first}');
+  return true;
 }

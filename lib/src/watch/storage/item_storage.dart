@@ -1,12 +1,9 @@
 import 'package:etebase_flutter/etebase_flutter.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../common/providers/hive_provider.dart';
+import '../../common/providers/app_database_provider.dart';
 import 'collection_storage.dart';
-import 'hive/hive_extensions.dart';
-import 'hive/stored_item.dart';
+import 'drift/database.dart';
 
 part 'item_storage.g.dart';
 
@@ -15,12 +12,11 @@ Future<ItemStorage> itemStorage(
   ItemStorageRef ref,
   String collectionUid,
 ) async {
-  await ref.watch(registerAdaptersProvider.future);
   final colStorage = await ref.watch(collectionStorageProvider.future);
-  final boxFactory = await ref.watch(hiveBoxFactoryProvider.future);
   final storage = ItemStorage(
+    collectionUid,
     (await colStorage.getItemManager(collectionUid))!,
-    await boxFactory(collectionUid),
+    await ref.watch(appDatabaseProvider.future),
   );
   ref.onDispose(storage.dispose);
   return storage;
@@ -28,57 +24,36 @@ Future<ItemStorage> itemStorage(
 
 class ItemStorage {
   final EtebaseItemManager _itemManager;
-  final LazyBox<StoredItem> _cacheBox;
-  final _logger = Logger('$ItemStorage');
+  final AppDatabase _database;
 
-  ItemStorage(this._itemManager, this._cacheBox);
+  final String collectionId;
 
-  bool get hasItems => _cacheBox.isNotEmpty;
+  ItemStorage(this.collectionId, this._itemManager, this._database);
+
+  Future<bool> get hasItems => _database.hasItems().getSingle();
 
   Stream<EtebaseItem> loadAll() async* {
-    _logger.finest('List all items from storage');
-
-    for (final uid in _cacheBox.keys.cast<String>()) {
-      _logger.finest('Attempting to load item $uid from storage');
-      final item = await _cacheBox.get(uid);
-      if (item != null) {
-        _logger.finest('Found item $uid');
-        yield await _itemManager.cacheLoad(item.data);
-      } else {
-        _logger.fine('No item with uid $uid in storage');
-      }
+    final items = await _database.listItems().get();
+    for (final item in items) {
+      yield await _itemManager.cacheLoad(item.data);
     }
   }
 
   Future<String> save(EtebaseItem item) async {
     final uid = await item.getUid();
-    _logger.finest('Saving item $uid to storage');
-
-    await _cacheBox.put(
-      uid,
-      StoredItem(await _itemManager.cacheSaveWithContent(item)),
+    await _database.saveItem(
+      StoredItem(
+        id: uid,
+        data: await _itemManager.cacheSaveWithContent(item),
+        collectionId: collectionId,
+      ),
     );
-    _logger.finer('Saved item $uid to storage');
     return uid;
   }
 
-  Future<void> remove(String uid) async {
-    _logger.finer('Removing item $uid from storage');
-    await _cacheBox.delete(uid);
-  }
+  Future<void> remove(String uid) => _database.deleteItem(uid);
 
-  Future<void> clear({bool fromDisk = false}) async {
-    if (fromDisk) {
-      _logger.fine('Deleting item storage from disk');
-      await _cacheBox.deleteFromDisk();
-    } else {
-      _logger.fine('Clearing item storage');
-      await _cacheBox.clear();
-    }
+  Future<void> dispose() async {
+    await _itemManager.dispose();
   }
-
-  Future<void> dispose() => Future.wait([
-        _cacheBox.close(),
-        _itemManager.dispose(),
-      ]);
 }
