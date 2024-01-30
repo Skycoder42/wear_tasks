@@ -1,16 +1,22 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../app/watch_theme.dart';
 import 'clock_bar.dart';
+import 'events/rotary_event_source.dart';
 
-class WatchScaffold extends StatelessWidget {
+typedef RotaryScrollHandler = bool Function(double scrollAxisValue);
+
+class WatchScaffold extends HookConsumerWidget {
   final Widget? leftAction;
   final Widget? rightAction;
   final Widget? bottomAction;
   final bool showClock;
   final bool horizontalSafeArea;
   final bool loadingOverlayActive;
+  final RotaryScrollHandler? rotaryScrollHandler;
   final Widget body;
 
   const WatchScaffold({
@@ -21,11 +27,17 @@ class WatchScaffold extends StatelessWidget {
     this.showClock = true,
     this.horizontalSafeArea = false,
     this.loadingOverlayActive = false,
+    this.rotaryScrollHandler,
     required this.body,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scrollHandlerCallback = useCallback<RotaryEventListener>(
+      (event) => rotaryScrollHandler?.call(event.scrollAxisValue) ?? false,
+      [rotaryScrollHandler],
+    );
+
     final mediaQuery = MediaQuery.of(context);
     return Scaffold(
       body: Stack(
@@ -93,6 +105,12 @@ class WatchScaffold extends StatelessWidget {
         DiagnosticsProperty<bool>(
           'loadingOverlayActive',
           loadingOverlayActive,
+        ),
+      )
+      ..add(
+        ObjectFlagProperty<RotaryScrollHandler?>.has(
+          'rotaryScrollHandler',
+          rotaryScrollHandler,
         ),
       );
   }
