@@ -2,4 +2,5 @@ include: package:dart_test_tools/strict.yaml
 
 analyzer:
   exclude:
+    - lib/gen
     - lib/src/watch/app/router/watch_router.g.dart

@@ -1,3 +1,5 @@
+additional_public_assets:
+  - pigeons/**
 targets:
   $default:
     builders:

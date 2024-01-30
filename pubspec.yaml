@@ -45,6 +45,8 @@ dev_dependencies:
     sdk: flutter
   freezed: ^2.4.6
   go_router_builder: ^2.4.1
+  pigeon: ^16.0.4
+  pigeon_build_runner: ^1.1.1
   riverpod_generator: ^2.3.9
   riverpod_lint: ^2.3.7
   settings_builder: ^1.1.1
@@ -58,3 +60,19 @@ flutter_native_splash:
   image: android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
   android_12:
     color: "#673ab7"
+
+pigeon:
+  main-input:
+    one-language: true
+    input: pigeons/
+    dart:
+      out: lib/gen/pigeons
+    kotlin:
+      out: android/app/src/main/kotlin/de/skycoder42/wearTasks
+      package: de.skycoder42.wearTasks
+  inputs:
+    - input: rotary_input.dart
+      dart:
+        out: rotary_input.pigeon.dart
+      kotlin:
+        out: RotaryInput.pigeon.kt

@@ -1,32 +1,37 @@
 package de.skycoder42.wearTasks
 
-import SyncWorker
-import androidx.work.BackoffPolicy
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.WorkRequest
+import android.view.MotionEvent
+import androidx.core.view.InputDeviceCompat
+import androidx.core.view.MotionEventCompat
 import io.flutter.embedding.android.FlutterActivity
-import java.util.concurrent.TimeUnit
+import io.flutter.embedding.engine.FlutterEngine
 
-class MainActivity: FlutterActivity() {
-    fun requestWork() {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
+class MainActivity : FlutterActivity() {
+    private var rotaryInput: RotaryInput? = null
 
-        val request: WorkRequest = OneTimeWorkRequestBuilder<SyncWorker>()
-            .addTag("etebase-upload")
-            .setConstraints(constraints)
-            .setBackoffCriteria(
-                BackoffPolicy.EXPONENTIAL,
-                WorkRequest.DEFAULT_BACKOFF_DELAY_MILLIS,
-                TimeUnit.MILLISECONDS)
-            .build()
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        rotaryInput = RotaryInput(flutterEngine.dartExecutor.binaryMessenger)
+    }
 
-        WorkManager
-            .getInstance(this)
-            .enqueue(request)
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        rotaryInput = null
+        super.cleanUpFlutterEngine(flutterEngine)
+    }
+
+    override fun onGenericMotionEvent(event: MotionEvent?): Boolean {
+        if (rotaryInput == null) {
+            return false
+        } else if (
+            event != null &&
+            event.action == MotionEvent.ACTION_SCROLL &&
+            event.isFromSource(InputDeviceCompat.SOURCE_ROTARY_ENCODER)
+        ) {
+            val scrollAxisValue = event.getAxisValue(MotionEventCompat.AXIS_SCROLL)
+            rotaryInput!!.handleRotaryEvent(RotaryEvent(scrollAxisValue.toDouble())) {}
+            return true
+        }
+
+        return super.onGenericMotionEvent(event)
     }
 }
