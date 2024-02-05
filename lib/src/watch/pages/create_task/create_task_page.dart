@@ -14,6 +14,7 @@ import '../../app/router/watch_router.dart';
 import '../../models/task.dart';
 import '../../models/task_recurrence.dart';
 import '../../services/create_task_service.dart';
+import '../../widgets/hooks/rotary_events_hook.dart';
 import '../../widgets/submit_form.dart';
 import '../../widgets/watch_scaffold.dart';
 import 'collection_selection/collection_selector_button.dart';
@@ -30,6 +31,7 @@ class CreateTaskPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scrollController = useRotaryScrollController(ref);
     final focusNode = useFocusNode();
     final state = ref.watch(createTaskControllerProvider);
     final createTaskState = ref.watch(createTaskServiceProvider);
@@ -116,6 +118,7 @@ class CreateTaskPage extends HookConsumerWidget {
           ),
         ),
         body: SingleChildScrollView(
+          controller: scrollController,
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 36),

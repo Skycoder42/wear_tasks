@@ -1,3 +1,4 @@
+import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // ignore: no_self_package_imports
@@ -17,6 +18,7 @@ RotaryEventSource rotaryEventSource(RotaryEventSourceRef ref) {
 
 class RotaryEventSource extends RotaryInput {
   final _listeners = <RotaryEventListener>[];
+  final _logger = Logger('$RotaryEventSource');
 
   void addListener(RotaryEventListener listener) => _listeners.add(listener);
 
@@ -25,9 +27,17 @@ class RotaryEventSource extends RotaryInput {
 
   @override
   void handleRotaryEvent(RotaryEvent event) {
+    _logger.finer('Handling rotary event: ${event.encode()}');
+
     for (final listener in _listeners.reversed) {
-      if (listener(event)) {
-        return;
+      try {
+        if (listener(event)) {
+          return;
+        }
+
+        // ignore: avoid_catches_without_on_clauses
+      } catch (e, s) {
+        _logger.severe('Rotary event handler threw', e, s);
       }
     }
   }

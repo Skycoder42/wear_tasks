@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -19,6 +21,55 @@ void useRotaryEvents(
       handler,
     ),
   );
+}
+
+class _ScrollState {
+  final double scrollStart;
+  final double scrollDelta;
+  final Future<void> future;
+
+  _ScrollState(
+    this.scrollStart,
+    this.scrollDelta,
+    this.future,
+  );
+}
+
+ScrollController useRotaryScrollController(WidgetRef ref) {
+  final scrollState = useRef<_ScrollState?>(null);
+  final scrollController = useScrollController();
+  final scrollHandler = useCallback<RotaryEventListener>(
+    (event) {
+      final scrollOffset = scrollController.offset;
+      var scrollDelta = event.scrollAxisValue * 50;
+      if (scrollState.value case final _ScrollState state) {
+        scrollDelta += state.scrollDelta - (scrollOffset - state.scrollStart);
+      }
+
+      // ignore: discarded_futures
+      final animateTo = scrollController.animateTo(
+        scrollOffset + scrollDelta,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.linear,
+      );
+      scrollState.value = _ScrollState(
+        scrollOffset,
+        scrollDelta,
+        animateTo,
+      );
+      unawaited(
+        animateTo.whenComplete(() {
+          if (identical(scrollState.value?.future, animateTo)) {
+            scrollState.value = null;
+          }
+        }),
+      );
+      return true;
+    },
+    [scrollController, scrollState],
+  );
+  useRotaryEvents(ref, scrollHandler);
+  return scrollController;
 }
 
 class _RotaryInputHook extends Hook<void> {
