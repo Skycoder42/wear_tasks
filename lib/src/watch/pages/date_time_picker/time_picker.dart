@@ -19,7 +19,7 @@ class TimePicker extends HookConsumerWidget {
     final dateTimeController = ref.watch(_controllerProvider.notifier);
     final initialTime = ref.read(_controllerProvider).time;
 
-    final pickerKey = useState(GlobalKey());
+    final pickerKey = useState(GlobalKey<State<CupertinoDatePicker>>());
     final currentTime = useState(initialTime);
 
     ref.listen(
@@ -31,6 +31,8 @@ class TimePicker extends HookConsumerWidget {
         }
       },
     );
+
+    // TODO attach to scroll controller
 
     return SafeArea(
       child: CupertinoDatePicker(

@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../app/watch_theme.dart';
+import '../../../widgets/hooks/rotary_scroll_controller_hook.dart';
 import 'collection_infos.dart';
 import 'collection_selector_button.dart';
 
@@ -28,8 +29,10 @@ class CollectionSelectorList extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final index = collections.indexWhere((c) => c.uid == currentUid);
-    final scrollController = useScrollController(
+    final scrollController = useRotaryScrollController(
+      ref,
       initialScrollOffset: _itemExtend * index,
+      itemExtend: _itemExtend,
     );
     final animationController = useAnimationController();
 

@@ -4,10 +4,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../common/extensions/core_extensions.dart';
 import '../../../common/localization/localization.dart';
-import '../../widgets/hooks/fixed_extent_scroll_controller_hook.dart';
+import '../../widgets/hooks/rotary_scroll_controller_hook.dart';
 import 'date_time_controller.dart';
 
 class DatePicker extends HookConsumerWidget {
+  static const itemExtend = 32.0;
+
   final DateTime initialDateTime;
 
   DateTimeControllerProvider get _controllerProvider =>
@@ -20,13 +22,19 @@ class DatePicker extends HookConsumerWidget {
     final dateTimeController = ref.watch(_controllerProvider.notifier);
     final initialDateTime = ref.read(_controllerProvider);
 
-    final dayController = useFixedExtentScrollController(
+    final dayController = useRotaryFixedExtentScrollController(
+      ref,
+      itemExtend: itemExtend,
       initialIndex: initialDateTime.day - 1,
     );
-    final monthController = useFixedExtentScrollController(
+    final monthController = useRotaryFixedExtentScrollController(
+      ref,
+      itemExtend: itemExtend,
       initialIndex: initialDateTime.month - 1,
     );
-    final yearController = useFixedExtentScrollController(
+    final yearController = useRotaryFixedExtentScrollController(
+      ref,
+      itemExtend: itemExtend,
       initialIndex: initialDateTime.year,
     );
 
@@ -59,7 +67,7 @@ class DatePicker extends HookConsumerWidget {
                     );
                     return CupertinoPicker(
                       looping: true,
-                      itemExtent: 32,
+                      itemExtent: itemExtend,
                       selectionOverlay: null,
                       scrollController: dayController,
                       onSelectedItemChanged: (dayIndex) =>
@@ -84,7 +92,7 @@ class DatePicker extends HookConsumerWidget {
                 flex: 3,
                 child: CupertinoPicker(
                   looping: true,
-                  itemExtent: 32,
+                  itemExtent: itemExtend,
                   selectionOverlay: null,
                   scrollController: monthController,
                   onSelectedItemChanged: (monthIndex) =>
@@ -106,7 +114,7 @@ class DatePicker extends HookConsumerWidget {
               Flexible(
                 flex: 3,
                 child: CupertinoPicker.builder(
-                  itemExtent: 32,
+                  itemExtent: itemExtend,
                   selectionOverlay: null,
                   scrollController: yearController,
                   onSelectedItemChanged: dateTimeController.updateYear,
@@ -123,7 +131,7 @@ class DatePicker extends HookConsumerWidget {
           ),
           Center(
             child: SizedBox(
-              height: 32,
+              height: itemExtend,
               width: double.infinity,
               child: DecoratedBox(
                 decoration: BoxDecoration(

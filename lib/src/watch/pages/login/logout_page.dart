@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../common/localization/localization.dart';
 import '../../app/watch_provider_scope.dart';
 import '../../services/account_service.dart';
+import '../../widgets/hooks/rotary_scroll_controller_hook.dart';
 import '../../widgets/watch_dialog.dart';
 
 class LogoutPage extends HookConsumerWidget {
@@ -13,6 +14,7 @@ class LogoutPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = useState(false);
+    final scrollController = useRotaryScrollController(ref);
 
     return WatchDialog<void>(
       horizontalSafeArea: true,
@@ -24,6 +26,7 @@ class LogoutPage extends HookConsumerWidget {
         scope.resetApp();
       },
       body: SingleChildScrollView(
+        controller: scrollController,
         child: SafeArea(
           child: Text(context.strings.logout_dialog_message),
         ),

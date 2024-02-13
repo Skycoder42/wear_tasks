@@ -8,6 +8,7 @@ import '../../../common/localization/localization.dart';
 import '../../app/router/watch_router.dart';
 import '../../app/watch_theme.dart';
 import '../../models/task_recurrence.dart';
+import '../../widgets/hooks/rotary_scroll_controller_hook.dart';
 import '../../widgets/watch_dialog.dart';
 import '../date_time_picker/date_time_picker_page.dart';
 import 'task_due_selection_controller.dart';
@@ -29,6 +30,7 @@ class TaskDueSelectionPage extends HookConsumerWidget {
       initialDateTime.copyWith(second: 0, millisecond: 0, microsecond: 0),
     );
     final currentRecurrence = useState<TaskRecurrence?>(initialRecurrence);
+    final scrollController = useRotaryScrollController(ref);
 
     ref.listenForErrors(context, taskDueSelectionControllerProvider);
 
@@ -37,6 +39,7 @@ class TaskDueSelectionPage extends HookConsumerWidget {
       onAccept: () => (currentDateTime.value, currentRecurrence.value),
       loadingOverlayActive: taskDueSelectionState is AsyncLoading,
       body: ListView(
+        controller: scrollController,
         children: [
           const SizedBox(width: double.infinity),
           Center(

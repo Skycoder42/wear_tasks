@@ -6,6 +6,7 @@ import '../../../common/localization/localization.dart';
 import '../../app/router/watch_router.dart';
 import '../../models/task.dart';
 import '../../widgets/hooks/change_notifier_hook.dart';
+import '../../widgets/hooks/rotary_scroll_controller_hook.dart';
 import '../../widgets/watch_scaffold.dart';
 import '../create_task/collection_selection/collection_selector_button.dart';
 import '../date_time_picker/date_time_picker_page.dart';
@@ -18,12 +19,19 @@ class SettingsPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsControllerProvider);
     final buttonNotifier = useChangeNotifier();
+    final scrollController = useRotaryScrollController(ref);
 
     return WatchScaffold(
       horizontalSafeArea: true,
       loadingOverlayActive: settingsState.isLoading,
       body: settingsState.hasValue
-          ? _buildBody(context, ref, settingsState.requireValue, buttonNotifier)
+          ? _buildBody(
+              context,
+              ref,
+              settingsState.requireValue,
+              buttonNotifier,
+              scrollController,
+            )
           : const SizedBox(),
     );
   }
@@ -33,8 +41,10 @@ class SettingsPage extends HookConsumerWidget {
     WidgetRef ref,
     SettingsState settings,
     HookChangeNotifier buttonNotifier,
+    ScrollController scrollController,
   ) =>
       ListView(
+        controller: scrollController,
         children: [
           ListTile(
             leading: const Icon(Icons.watch_later),

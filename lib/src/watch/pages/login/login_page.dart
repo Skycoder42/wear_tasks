@@ -14,6 +14,7 @@ import '../../../common/widgets/error_snack_bar.dart';
 import '../../../common/widgets/success_snack_bar.dart';
 import '../../services/account_service.dart';
 import '../../widgets/checkbox_form_field.dart';
+import '../../widgets/hooks/rotary_scroll_controller_hook.dart';
 import '../../widgets/submit_form.dart';
 import '../../widgets/watch_scaffold.dart';
 
@@ -33,6 +34,7 @@ class LoginPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final customServerUrlController = useTextEditingController();
+    final scrollController = useRotaryScrollController(ref);
 
     final (
       useDefaultServer,
@@ -74,6 +76,7 @@ class LoginPage extends HookConsumerWidget {
     return WatchScaffold(
       loadingOverlayActive: loginState is AsyncLoading,
       body: SingleChildScrollView(
+        controller: scrollController,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),

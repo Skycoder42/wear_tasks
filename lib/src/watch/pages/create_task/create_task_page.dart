@@ -14,7 +14,7 @@ import '../../app/router/watch_router.dart';
 import '../../models/task.dart';
 import '../../models/task_recurrence.dart';
 import '../../services/create_task_service.dart';
-import '../../widgets/hooks/rotary_events_hook.dart';
+import '../../widgets/hooks/rotary_scroll_controller_hook.dart';
 import '../../widgets/submit_form.dart';
 import '../../widgets/watch_scaffold.dart';
 import 'collection_selection/collection_selector_button.dart';

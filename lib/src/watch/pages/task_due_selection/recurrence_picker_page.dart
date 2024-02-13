@@ -10,6 +10,7 @@ import '../../../common/localization/localization.dart';
 import '../../app/router/watch_router.dart';
 import '../../app/watch_theme.dart';
 import '../../models/task_recurrence.dart';
+import '../../widgets/hooks/rotary_scroll_controller_hook.dart';
 import '../../widgets/side_button.dart';
 import '../../widgets/watch_dialog.dart';
 
@@ -31,9 +32,12 @@ class RecurrencePickerPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final frequencyController = useScrollController(
+    final frequencyController = useRotaryScrollController(
+      ref,
       initialScrollOffset: _initialScrollOffset,
     );
+    final recurrenceController = useRotaryScrollController(ref);
+
     final intervalController = useTextEditingController(
       text: (initialRecurrence?.interval ?? 1).toString(),
     );
@@ -114,6 +118,7 @@ class RecurrencePickerPage extends HookConsumerWidget {
           ],
         ),
         ListView(
+          controller: recurrenceController,
           children: [
             ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 4),
