@@ -113,6 +113,25 @@
       }
     }
   },
+  "time_picker_hour": "{date}",
+  "@time_picker_hour": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "H"
+      }
+    }
+  },
+  "time_picker_minute": "{date}",
+  "@time_picker_minute": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "isCustomDateFormat": "true",
+        "format": "mm"
+      }
+    }
+  },
   "recurrence_selection_page_frequency": "{frequency, select, secondly{Secondly} minutely{Minutely} hourly{Hourly} daily{Daily} weekly{Weekly} monthly{Monthly} yearly{Yearly} other{{frequency}}}",
   "@recurrence_selection_page_frequency": {
     "placeholders": {

@@ -19,8 +19,10 @@ class DateTimeController extends _$DateTimeController {
 
   DateTime updateDay(int day) => _updateDate(day: day);
 
-  DateTime updateTime(int hour, int minute) =>
-      state = state.copyWith(hour: hour, minute: minute);
+  DateTime updateHour(int hour) => state = state.copyWith(hour: hour);
+
+  DateTime updateMinute(int minute) =>
+      state = _toIntervalTime(state.copyWith(minute: minute));
 
   void resetDate() {
     final now = _toIntervalTime(DateTime.now());
