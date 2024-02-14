@@ -21,17 +21,20 @@ typedef CollectionInfo = ({
 @riverpod
 class CollectionInfos extends _$CollectionInfos {
   @override
-  Future<List<CollectionInfo>> build() async {
+  Stream<List<CollectionInfo>> build() async* {
     final repository = await ref.watch(collectionRepositoryProvider.future);
-    final infos = await _loadInfos(repository).toList();
 
-    if (infos.isEmpty) {
-      return [
+    final collections = <CollectionInfo>[];
+    await for (final c in _loadInfos(repository)) {
+      collections.add(c);
+      yield collections;
+    }
+
+    if (collections.isEmpty) {
+      yield [
         await _createDefaultCollection(repository),
       ];
     }
-
-    return infos;
   }
 
   Stream<CollectionInfo> _loadInfos(CollectionRepository repository) async* {
