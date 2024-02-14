@@ -25,6 +25,7 @@ void useRotaryScrollHandler(
   ScrollController scrollController, {
   double itemExtend = 50,
   bool enabled = true,
+  bool requireActive = true,
 }) {
   final scrollState = useRef<_ScrollState?>(null);
   final scrollHandler = useCallback<RotaryEventListener>(
@@ -61,13 +62,14 @@ void useRotaryScrollHandler(
     },
     [scrollController, scrollState, enabled],
   );
-  useRotaryEvents(ref, scrollHandler);
+  useRotaryEvents(ref, scrollHandler, requireActive: requireActive);
 }
 
 ScrollController useRotaryScrollController(
   WidgetRef ref, {
   double itemExtend = 50,
   bool enabled = true,
+  bool requireActive = true,
   double initialScrollOffset = 0.0,
   bool keepScrollOffset = true,
   String? debugLabel,
@@ -84,6 +86,7 @@ ScrollController useRotaryScrollController(
     scrollController,
     itemExtend: itemExtend,
     enabled: enabled,
+    requireActive: requireActive,
   );
   return scrollController;
 }
@@ -92,6 +95,7 @@ FixedExtentScrollController useRotaryFixedExtentScrollController(
   WidgetRef ref, {
   required double itemExtend,
   bool enabled = true,
+  bool requireActive = true,
   int initialIndex = 0,
 }) {
   final scrollController = useFixedExtentScrollController(
@@ -102,6 +106,7 @@ FixedExtentScrollController useRotaryFixedExtentScrollController(
     scrollController,
     itemExtend: itemExtend,
     enabled: enabled,
+    requireActive: requireActive,
   );
   return scrollController;
 }

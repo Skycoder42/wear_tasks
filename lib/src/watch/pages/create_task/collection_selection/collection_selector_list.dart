@@ -33,6 +33,7 @@ class CollectionSelectorList extends HookConsumerWidget {
       ref,
       initialScrollOffset: _itemExtend * index,
       itemExtend: _itemExtend,
+      requireActive: false,
     );
     final animationController = useAnimationController();
 
