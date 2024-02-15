@@ -16,7 +16,6 @@ abstract base class Setup {
           options
             ..debug = kDebugMode
             ..attachThreads = true
-            ..autoInitializeNativeSdk = false
             ..anrEnabled = true
             ..autoAppStart = false
             ..attachViewHierarchy = true
