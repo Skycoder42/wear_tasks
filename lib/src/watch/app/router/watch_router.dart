@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../../models/task_recurrence.dart';
 import '../../pages/create_task/create_task_page.dart';
@@ -24,6 +25,7 @@ GoRouter watchRouter(WatchRouterRef ref) => GoRouter(
       routes: $appRoutes,
       observers: [
         ref.watch(startupObserverProvider),
+        SentryNavigatorObserver(),
       ],
       redirect: ref.watch(globalResolverProvider).call,
     );

@@ -1,24 +1,38 @@
-// ignore_for_file: avoid_print
-
 import 'package:etebase_flutter/etebase_flutter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:sentry_logging/sentry_logging.dart';
 
-void setup() {
-  _setupLogger();
-}
+const sentryDsn =
+    'https://a435fd2d17c24b6d17680cf73257e7ae@o4506750007115776.ingest.sentry.io/4506750008360960';
 
-void _setupLogger() {
-  Logger.root
-    ..level = Level.ALL
-    ..onRecord.listen((event) {
-      print(event);
-      if (event.error != null) {
-        print(event.error);
-      }
-      if (event.stackTrace != null) {
-        print(event.stackTrace);
-      }
-    });
+abstract base class Setup {
+  const Setup._();
 
-  EtebaseFlutter().configure(logLevel: Level.ALL.value);
+  static Future<void> run(
+    AppRunner appRunner, [
+    FlutterOptionsConfiguration extraConfig = _noOpExtra,
+  ]) =>
+      SentryFlutter.init(
+        (options) => extraConfig(
+          options
+            ..debug = kDebugMode
+            ..dsn = sentryDsn
+            ..attachThreads = true
+            ..anrEnabled = true
+            ..autoAppStart = false
+            ..attachViewHierarchy = true
+            ..addIntegration(LoggingIntegration()),
+        ),
+        appRunner: () {
+          EtebaseFlutter().configure(
+            logLevel: kDebugMode ? Level.ALL.value : null,
+          );
+
+          return appRunner();
+        },
+      );
+
+  static void _noOpExtra(SentryFlutterOptions config) {}
 }
