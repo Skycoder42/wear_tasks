@@ -24,7 +24,7 @@ Future<Workmanager> workmanager(WorkmanagerRef ref) async {
 }
 
 @pragma('vm:entry-point')
-Future<void> workmanagerMain() => Setup.run(
+FutureOr<void> workmanagerMain() => Setup.run(
       _appRunner,
       // (options) => options
       //   ..autoInitializeNativeSdk = false

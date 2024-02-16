@@ -52,6 +52,8 @@ dev_dependencies:
   go_router_builder: ^2.4.1
   pigeon: ^17.0.0
   pigeon_build_runner: ^1.1.1
+  pub_semver: ^2.1.4
+  pubspec_parse: ^1.2.3
   riverpod_generator: ^2.3.11
   riverpod_lint: ^2.3.9
   sentry_dart_plugin: ^1.6.0
