@@ -117,7 +117,8 @@ jobs:
           fastlane upload_to_play_store
           --json_key "$RUNNER_TEMP/fastlane-key-file.json"
           --package_name de.skycoder42.wearTasks
-          --track internal
+          --track production
+          --release_status draft
           --aab ../build/bundle/release/app-release.aab
           --mapping ../build/mapping/release/mapping.txt
         working-directory: android
