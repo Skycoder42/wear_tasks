@@ -1,0 +1,2 @@
+json_key_file("fastlane-key-file.json")
+package_name("de.skycoder42.wearTasks")

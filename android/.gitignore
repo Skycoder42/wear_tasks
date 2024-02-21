@@ -12,3 +12,6 @@ key.properties
 **/*.keystore
 **/*.jks
 **/*.p12
+
+Gemfile.lock
+fastlane-key-file.json

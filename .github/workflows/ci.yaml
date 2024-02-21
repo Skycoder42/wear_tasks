@@ -12,10 +12,17 @@ jobs:
       unitTestPaths: ""
       buildRunner: true
 
-  build:
+  cd:
+    name: CD
+    uses: Skycoder42/dart_test_tools/.github/workflows/release.yml@main
+    secrets:
+      githubToken: ${{ secrets.GH_PAT }}
+
+  cd_build:
     name: CD / Build app
     needs:
-      - ci
+      - cd
+    if: ${{ needs.cd.outputs.releaseCreated }}
     runs-on: ubuntu-latest
     environment: google-play
     outputs:
@@ -72,7 +79,9 @@ jobs:
   deploy:
     name: CD / Upload app to google play
     needs:
-      - build
+      - cd
+      - cd_build
+    if: ${{ needs.cd.outputs.releaseCreated }}
     runs-on: ubuntu-latest
     environment: google-play
     steps:
@@ -80,6 +89,10 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           cache: true
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0
+          bundler-cache: true
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -96,3 +109,12 @@ jobs:
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DIST: ${{ needs.build.outputs.buildNumber }}
+      - name: Prepare Google Play key
+        run: echo '${{ secrets.GOOGLE_PLAY_KEY }}' > android/fastlane-key-file.json
+      - uses: maierj/fastlane-action@v3.0.0
+        with:
+          subdirectory: android
+          lane: deploy
+      - name: Delete Google Play key
+        if: always()
+        run: rm -f android/fastlane-key-file.json
