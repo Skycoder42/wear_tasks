@@ -105,11 +105,6 @@ jobs:
           path: build
       - name: Restore dart packages
         run: flutter pub get
-      - name: Upload debug symbols
-        run: flutter pub run sentry_dart_plugin
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_DIST: ${{ needs.build.outputs.buildNumber }}
       - name: Prepare Google Play key
         run: echo '${{ secrets.GOOGLE_PLAY_KEY }}' > "$RUNNER_TEMP/fastlane-key-file.json"
       - name: Deploy to Google Play
@@ -117,11 +112,16 @@ jobs:
           fastlane upload_to_play_store
           --json_key "$RUNNER_TEMP/fastlane-key-file.json"
           --package_name de.skycoder42.wearTasks
-          --track production
+          --track wear:production
           --release_status draft
           --aab ../build/bundle/release/app-release.aab
           --mapping ../build/mapping/release/mapping.txt
         working-directory: android
+      - name: Upload debug symbols
+        run: flutter pub run sentry_dart_plugin
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DIST: ${{ needs.build.outputs.buildNumber }}
       - name: Delete Google Play key
         if: always()
         run: rm -f "$RUNNER_TEMP/fastlane-key-file.json"
