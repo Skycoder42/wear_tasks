@@ -90,7 +90,6 @@ sentry:
   upload_debug_symbols: true
   org: skycoder42
   project: wear_tasks
-  log_level: debug
 
 cider:
   link_template:

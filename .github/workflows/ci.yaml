@@ -84,17 +84,15 @@ jobs:
       - cd
       - cd_build
     if: ${{ needs.cd.outputs.releaseCreated }}
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     environment: google-play
     steps:
       - name: Install Flutter-SDK
         uses: subosito/flutter-action@v2
         with:
           cache: true
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.0
-          bundler-cache: true
+      - name: Install fastlane
+        run: brew install fastlane
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -114,16 +112,15 @@ jobs:
           SENTRY_DIST: ${{ needs.build.outputs.buildNumber }}
       - name: Prepare Google Play key
         run: echo '${{ secrets.GOOGLE_PLAY_KEY }}' > "$RUNNER_TEMP/fastlane-key-file.json"
-      - uses: maierj/fastlane-action@v3.0.0
-        with:
-          subdirectory: android
-          lane: >-
-            upload_to_play_store
-            --json_key "$RUNNER_TEMP/fastlane-key-file.json"
-            --package_name de.skycoder42.wearTasks
-            --track internal
-            --aab ../build/app/outputs/bundle/release/app-release.aab
-            --mapping ../build/app/outputs/mapping/release/mapping.txt
+      - name: Deploy to Google Play
+        run: >-
+          fastlane upload_to_play_store
+          --json_key "$RUNNER_TEMP/fastlane-key-file.json"
+          --package_name de.skycoder42.wearTasks
+          --track internal
+          --aab ../build/app/outputs/bundle/release/app-release.aab
+          --mapping ../build/app/outputs/mapping/release/mapping.txt
+        working-directory: android
       - name: Delete Google Play key
         if: always()
         run: rm -f "$RUNNER_TEMP/fastlane-key-file.json"
