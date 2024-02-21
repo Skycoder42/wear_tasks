@@ -113,11 +113,17 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DIST: ${{ needs.build.outputs.buildNumber }}
       - name: Prepare Google Play key
-        run: echo '${{ secrets.GOOGLE_PLAY_KEY }}' > android/fastlane-key-file.json
+        run: echo '${{ secrets.GOOGLE_PLAY_KEY }}' > "$RUNNER_TEMP/fastlane-key-file.json"
       - uses: maierj/fastlane-action@v3.0.0
         with:
           subdirectory: android
-          lane: deploy
+          lane: >-
+            upload_to_play_store
+            --json_key "$RUNNER_TEMP/fastlane-key-file.json"
+            --package_name de.skycoder42.wearTasks
+            --track internal
+            --aab ../build/app/outputs/bundle/release/app-release.aab
+            --mapping ../build/app/outputs/mapping/release/mapping.txt
       - name: Delete Google Play key
         if: always()
-        run: rm -f android/fastlane-key-file.json
+        run: rm -f "$RUNNER_TEMP/fastlane-key-file.json"
