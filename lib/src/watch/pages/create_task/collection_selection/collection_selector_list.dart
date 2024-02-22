@@ -32,6 +32,7 @@ class CollectionSelectorList extends HookConsumerWidget {
     final scrollController = useRotaryScrollController(
       initialScrollOffset: _itemExtend * index,
       maxIncrement: _itemExtend,
+      requireActive: false,
     );
     final animationController = useAnimationController();
 
