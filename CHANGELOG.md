@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Automatically publish Changelog when deploying to google play
+- Adjust splashscreen to Wear OS guidelines
 
 ## [1.0.2] - 2024-02-21
 ### Changed

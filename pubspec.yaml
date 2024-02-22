@@ -65,10 +65,10 @@ flutter:
   generate: true
 
 flutter_native_splash:
-  color: "#673ab7"
+  color: "#000000"
   image: android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
   android_12:
-    color: "#673ab7"
+    color: "#000000"
 
 pigeon:
   main-input:
