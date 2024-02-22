@@ -33,10 +33,9 @@ class RecurrencePickerPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final frequencyController = useRotaryScrollController(
-      ref,
       initialScrollOffset: _initialScrollOffset,
     );
-    final recurrenceController = useRotaryScrollController(ref);
+    final recurrenceController = useRotaryScrollController();
 
     final intervalController = useTextEditingController(
       text: (initialRecurrence?.interval ?? 1).toString(),

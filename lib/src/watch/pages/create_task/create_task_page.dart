@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:rotary_scrollbar/rotary_scrollbar.dart';
 
 import '../../../common/extensions/riverpod_extensions.dart';
 import '../../../common/localization/error_localizer.dart';
@@ -31,7 +32,7 @@ class CreateTaskPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scrollController = useRotaryScrollController(ref);
+    final scrollController = useRotaryScrollController();
     final focusNode = useFocusNode();
     final state = ref.watch(createTaskControllerProvider);
     final createTaskState = ref.watch(createTaskServiceProvider);
@@ -117,60 +118,68 @@ class CreateTaskPage extends HookConsumerWidget {
             child: const Icon(Icons.add),
           ),
         ),
-        body: SingleChildScrollView(
-          controller: scrollController,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 36),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextFormField(
-                    enabled: !isProcessing,
-                    focusNode: focusNode,
-                    decoration: InputDecoration(
-                      alignLabelWithHint: true,
-                      label:
-                          Text(context.strings.create_task_page_summary_label),
-                    ),
-                    validator: (value) =>
-                        _validateNotNullOrEmpty(context, value),
-                    onSaved: (newValue) => onSaved(_summaryKey, newValue),
-                  ),
-                  const SizedBox(height: 8),
-                  if (state case AsyncData(value: final value))
-                    ElevatedButton.icon(
-                      icon: value.currentRecurrence != null
-                          ? const Icon(Icons.event_repeat)
-                          : const Icon(Icons.event),
-                      label: Text(
-                        context.strings
-                            .taskDueDescription(value.currentDueDate),
+        body: RotaryScrollWrapper(
+          rotaryScrollbar: RotaryScrollbar(
+            controller: scrollController,
+            width: 4,
+            padding: 4,
+          ),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 36),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextFormField(
+                      enabled: !isProcessing,
+                      focusNode: focusNode,
+                      decoration: InputDecoration(
+                        alignLabelWithHint: true,
+                        label: Text(
+                          context.strings.create_task_page_summary_label,
+                        ),
                       ),
-                      onPressed: () async {
-                        final result = await DateTimeSelectionRoute.from(
-                          value.currentDueDate,
-                          value.currentRecurrence,
-                        ).push<(DateTime, TaskRecurrence?)>(context);
-                        if (result case (final dateTime, final recurrence)) {
-                          await ref
-                              .read(createTaskControllerProvider.notifier)
-                              .updateDueDate(dateTime, recurrence);
-                        }
-                      },
+                      validator: (value) =>
+                          _validateNotNullOrEmpty(context, value),
+                      onSaved: (newValue) => onSaved(_summaryKey, newValue),
                     ),
-                  TextFormField(
-                    enabled: !isProcessing,
-                    decoration: InputDecoration(
-                      alignLabelWithHint: true,
-                      label: Text(
-                        context.strings.create_task_page_description_label,
+                    const SizedBox(height: 8),
+                    if (state case AsyncData(value: final value))
+                      ElevatedButton.icon(
+                        icon: value.currentRecurrence != null
+                            ? const Icon(Icons.event_repeat)
+                            : const Icon(Icons.event),
+                        label: Text(
+                          context.strings
+                              .taskDueDescription(value.currentDueDate),
+                        ),
+                        onPressed: () async {
+                          final result = await DateTimeSelectionRoute.from(
+                            value.currentDueDate,
+                            value.currentRecurrence,
+                          ).push<(DateTime, TaskRecurrence?)>(context);
+                          if (result case (final dateTime, final recurrence)) {
+                            await ref
+                                .read(createTaskControllerProvider.notifier)
+                                .updateDueDate(dateTime, recurrence);
+                          }
+                        },
                       ),
+                    TextFormField(
+                      enabled: !isProcessing,
+                      decoration: InputDecoration(
+                        alignLabelWithHint: true,
+                        label: Text(
+                          context.strings.create_task_page_description_label,
+                        ),
+                      ),
+                      onSaved: (newValue) => onSaved(_descriptionKey, newValue),
                     ),
-                    onSaved: (newValue) => onSaved(_descriptionKey, newValue),
-                  ),
-                  const SizedBox(height: 8),
-                ],
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
             ),
           ),

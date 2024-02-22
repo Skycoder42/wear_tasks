@@ -34,7 +34,7 @@ class LoginPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final customServerUrlController = useTextEditingController();
-    final scrollController = useRotaryScrollController(ref);
+    final scrollController = useRotaryScrollController();
 
     final (
       useDefaultServer,

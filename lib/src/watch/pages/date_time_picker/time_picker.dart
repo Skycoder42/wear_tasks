@@ -6,7 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../common/extensions/core_extensions.dart';
 import '../../../common/localization/localization.dart';
 import '../../app/watch_theme.dart';
-import '../../widgets/hooks/rotary_scroll_controller_hook.dart';
+import '../../widgets/hooks/fixed_extent_rotary_scroll_controller_hook.dart';
 import '../../widgets/interaction_detector.dart';
 import 'date_time_controller.dart';
 
@@ -31,16 +31,14 @@ class TimePicker extends HookConsumerWidget {
     final initialTime = ref.read(_controllerProvider).time;
     final activeColumn = useState(TimePickerColumn.hour);
 
-    final hourController = useRotaryFixedExtentScrollController(
-      ref,
-      itemExtend: itemExtend,
-      initialIndex: initialTime.hour,
+    final hourController = useFixedExtendRotaryScrollController(
+      maxIncrement: itemExtend,
+      initialItem: initialTime.hour,
       enabled: activeColumn.value == TimePickerColumn.hour,
     );
-    final minuteController = useRotaryFixedExtentScrollController(
-      ref,
-      itemExtend: itemExtend,
-      initialIndex: initialTime.minute ~/ DateTimeController.minuteInterval,
+    final minuteController = useFixedExtendRotaryScrollController(
+      maxIncrement: itemExtend,
+      initialItem: initialTime.minute ~/ DateTimeController.minuteInterval,
       enabled: activeColumn.value == TimePickerColumn.minute,
     );
 

@@ -30,7 +30,7 @@ class TaskDueSelectionPage extends HookConsumerWidget {
       initialDateTime.copyWith(second: 0, millisecond: 0, microsecond: 0),
     );
     final currentRecurrence = useState<TaskRecurrence?>(initialRecurrence);
-    final scrollController = useRotaryScrollController(ref);
+    final scrollController = useRotaryScrollController();
 
     ref.listenForErrors(context, taskDueSelectionControllerProvider);
 

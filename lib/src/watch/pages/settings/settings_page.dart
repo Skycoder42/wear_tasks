@@ -19,7 +19,7 @@ class SettingsPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsControllerProvider);
     final buttonNotifier = useChangeNotifier();
-    final scrollController = useRotaryScrollController(ref);
+    final scrollController = useRotaryScrollController();
 
     return WatchScaffold(
       horizontalSafeArea: true,

@@ -30,10 +30,8 @@ class CollectionSelectorList extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final index = collections.indexWhere((c) => c.uid == currentUid);
     final scrollController = useRotaryScrollController(
-      ref,
       initialScrollOffset: _itemExtend * index,
-      itemExtend: _itemExtend,
-      requireActive: false,
+      maxIncrement: _itemExtend,
     );
     final animationController = useAnimationController();
 

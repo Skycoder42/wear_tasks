@@ -14,7 +14,7 @@ class LogoutPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = useState(false);
-    final scrollController = useRotaryScrollController(ref);
+    final scrollController = useRotaryScrollController();
 
     return WatchDialog<void>(
       horizontalSafeArea: true,

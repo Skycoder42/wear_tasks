@@ -6,7 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../common/extensions/core_extensions.dart';
 import '../../../common/localization/localization.dart';
 import '../../app/watch_theme.dart';
-import '../../widgets/hooks/rotary_scroll_controller_hook.dart';
+import '../../widgets/hooks/fixed_extent_rotary_scroll_controller_hook.dart';
 import '../../widgets/interaction_detector.dart';
 import 'date_time_controller.dart';
 
@@ -32,22 +32,19 @@ class DatePicker extends HookConsumerWidget {
     final initialDateTime = ref.read(_controllerProvider);
     final activeColumn = useState(DatePickerColumn.day);
 
-    final dayController = useRotaryFixedExtentScrollController(
-      ref,
-      itemExtend: itemExtend,
-      initialIndex: initialDateTime.day - 1,
+    final dayController = useFixedExtendRotaryScrollController(
+      maxIncrement: itemExtend,
+      initialItem: initialDateTime.day - 1,
       enabled: activeColumn.value == DatePickerColumn.day,
     );
-    final monthController = useRotaryFixedExtentScrollController(
-      ref,
-      itemExtend: itemExtend,
-      initialIndex: initialDateTime.month - 1,
+    final monthController = useFixedExtendRotaryScrollController(
+      maxIncrement: itemExtend,
+      initialItem: initialDateTime.month - 1,
       enabled: activeColumn.value == DatePickerColumn.month,
     );
-    final yearController = useRotaryFixedExtentScrollController(
-      ref,
-      itemExtend: itemExtend,
-      initialIndex: initialDateTime.year,
+    final yearController = useFixedExtendRotaryScrollController(
+      maxIncrement: itemExtend,
+      initialItem: initialDateTime.year,
       enabled: activeColumn.value == DatePickerColumn.year,
     );
 

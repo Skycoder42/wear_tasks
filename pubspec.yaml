@@ -32,12 +32,14 @@ dependencies:
   path: ^1.9.0
   path_provider: ^2.1.2
   riverpod_annotation: ^2.3.4
+  rotary_scrollbar: ^0.1.1
   sentry_flutter: ^7.16.1
   sentry_logging: ^7.16.1
   settings_annotation: ^1.0.1
   sqlcipher_flutter_libs: ^0.6.1
   sqlite3: ^2.4.0
   uuid: ^4.3.3
+  wearable_rotary: ^2.0.2
   workmanager: ^0.5.2
 
 dev_dependencies:
@@ -51,8 +53,6 @@ dev_dependencies:
     sdk: flutter
   freezed: ^2.4.7
   go_router_builder: ^2.4.1
-  pigeon: ^17.0.0
-  pigeon_build_runner: ^1.1.1
   pub_semver: ^2.1.4
   pubspec_parse: ^1.2.3
   riverpod_generator: ^2.3.11

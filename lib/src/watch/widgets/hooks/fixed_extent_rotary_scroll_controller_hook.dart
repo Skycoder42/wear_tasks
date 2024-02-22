@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:wearable_rotary/wearable_rotary.dart';
 
-class _ConfigurableRotaryScrollController extends ScrollController
+class FixedExtentRotaryScrollController extends FixedExtentScrollController
     implements RotaryScrollController {
   @override
   final double maxIncrement;
@@ -16,26 +16,12 @@ class _ConfigurableRotaryScrollController extends ScrollController
 
   StreamSubscription<RotaryEvent>? _subscription;
 
-  _ConfigurableRotaryScrollController({
+  FixedExtentRotaryScrollController({
+    super.initialItem,
+    super.onAttach,
+    super.onDetach,
     this.maxIncrement = 50,
-    super.initialScrollOffset,
   });
-
-  void _onRotaryEvent(RotaryEvent event) {
-    if (!enabled) {
-      return;
-    }
-
-    final double increment = min(event.magnitude ?? maxIncrement, maxIncrement);
-
-    final double newOffset;
-    if (event.direction == RotaryDirection.clockwise) {
-      newOffset = min(offset + increment, position.maxScrollExtent);
-    } else {
-      newOffset = max(offset - increment, position.minScrollExtent);
-    }
-    jumpTo(newOffset);
-  }
 
   @override
   void attach(ScrollPosition position) {
@@ -54,61 +40,78 @@ class _ConfigurableRotaryScrollController extends ScrollController
     unawaited(_subscription?.cancel());
     super.dispose();
   }
+
+  void _onRotaryEvent(RotaryEvent event) {
+    if (!enabled) {
+      return;
+    }
+
+    final double increment = min(event.magnitude ?? maxIncrement, maxIncrement);
+
+    final double newOffset;
+    if (event.direction == RotaryDirection.clockwise) {
+      newOffset = min(offset + increment, position.maxScrollExtent);
+    } else {
+      newOffset = max(offset - increment, position.minScrollExtent);
+    }
+    jumpTo(newOffset);
+  }
 }
 
-RotaryScrollController useRotaryScrollController({
+FixedExtentRotaryScrollController useFixedExtendRotaryScrollController({
+  int initialItem = 0,
   double maxIncrement = 50,
-  double initialScrollOffset = 0,
   bool enabled = true,
 }) =>
     use(
-      _RotaryScrollControllerHook(
+      _FixedExtentRotaryScrollControllerHook(
+        initialItem,
         maxIncrement,
-        initialScrollOffset,
         enabled,
       ),
     );
 
-class _RotaryScrollControllerHook extends Hook<RotaryScrollController> {
+class _FixedExtentRotaryScrollControllerHook
+    extends Hook<FixedExtentRotaryScrollController> {
+  final int initialItem;
   final double maxIncrement;
-  final double initialScrollOffset;
   final bool enabled;
 
-  const _RotaryScrollControllerHook(
+  const _FixedExtentRotaryScrollControllerHook(
+    this.initialItem,
     this.maxIncrement,
-    this.initialScrollOffset,
     this.enabled,
   );
 
   @override
-  _RotaryScrollControllerHookState createState() =>
-      _RotaryScrollControllerHookState();
+  _FixedExtentRotaryScrollControllerHookState createState() =>
+      _FixedExtentRotaryScrollControllerHookState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
+      ..add(IntProperty('initialItem', initialItem))
       ..add(DoubleProperty('maxIncrement', maxIncrement))
-      ..add(DoubleProperty('initialScrollOffset', initialScrollOffset))
       ..add(DiagnosticsProperty<bool>('enabled', enabled));
   }
 }
 
-class _RotaryScrollControllerHookState
-    extends HookState<RotaryScrollController, _RotaryScrollControllerHook> {
-  late _ConfigurableRotaryScrollController _controller;
+class _FixedExtentRotaryScrollControllerHookState extends HookState<
+    FixedExtentRotaryScrollController, _FixedExtentRotaryScrollControllerHook> {
+  late FixedExtentRotaryScrollController _controller;
 
   @override
   void initHook() {
     super.initHook();
-    _controller = _ConfigurableRotaryScrollController(
+    _controller = FixedExtentRotaryScrollController(
+      initialItem: hook.initialItem,
       maxIncrement: hook.maxIncrement,
-      initialScrollOffset: hook.initialScrollOffset,
     )..enabled = hook.enabled;
   }
 
   @override
-  void didUpdateHook(_RotaryScrollControllerHook oldHook) {
+  void didUpdateHook(_FixedExtentRotaryScrollControllerHook oldHook) {
     super.didUpdateHook(oldHook);
     _controller.enabled = hook.enabled;
   }
@@ -120,5 +123,5 @@ class _RotaryScrollControllerHookState
   }
 
   @override
-  RotaryScrollController build(BuildContext context) => _controller;
+  FixedExtentRotaryScrollController build(BuildContext context) => _controller;
 }
