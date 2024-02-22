@@ -105,6 +105,14 @@ jobs:
           path: build
       - name: Restore dart packages
         run: flutter pub get
+      - name: Prepare Changelog
+        run: |
+          set -exo pipefail
+
+          changelogs_dir=android/fastlane/metadata/android/en-US/changelogs
+          mkdir -p "$changelogs_dir"
+
+          dart run cider describe '${{ needs.cd.outputs.releaseVersion }}' > "$changelogs_dir/${{ needs.build.outputs.buildNumber }}.txt"
       - name: Prepare Google Play key
         run: echo '${{ secrets.GOOGLE_PLAY_KEY }}' > "$RUNNER_TEMP/fastlane-key-file.json"
       - name: Deploy to Google Play
