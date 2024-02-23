@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:rotary_scrollbar/rotary_scrollbar.dart';
 
 import '../../../common/extensions/riverpod_extensions.dart';
 import '../../../common/localization/error_localizer.dart';
@@ -18,6 +17,7 @@ import '../../services/create_task_service.dart';
 import '../../widgets/hooks/rotary_scroll_controller_hook.dart';
 import '../../widgets/submit_form.dart';
 import '../../widgets/watch_scaffold.dart';
+import '../../widgets/watch_scrollbar.dart';
 import 'collection_selection/collection_selector_button.dart';
 import 'create_task_controller.dart';
 import 'priority_button.dart';
@@ -118,12 +118,8 @@ class CreateTaskPage extends HookConsumerWidget {
             child: const Icon(Icons.add),
           ),
         ),
-        body: RotaryScrollWrapper(
-          rotaryScrollbar: RotaryScrollbar(
-            controller: scrollController,
-            width: 4,
-            padding: 4,
-          ),
+        body: WatchScrollbar(
+          controller: scrollController,
           child: SingleChildScrollView(
             controller: scrollController,
             child: SafeArea(

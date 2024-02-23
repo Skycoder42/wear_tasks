@@ -7,6 +7,7 @@ import '../../app/watch_provider_scope.dart';
 import '../../services/account_service.dart';
 import '../../widgets/hooks/rotary_scroll_controller_hook.dart';
 import '../../widgets/watch_dialog.dart';
+import '../../widgets/watch_scrollbar.dart';
 
 class LogoutPage extends HookConsumerWidget {
   const LogoutPage({super.key});
@@ -25,10 +26,13 @@ class LogoutPage extends HookConsumerWidget {
         await ref.read(accountServiceProvider.notifier).logout();
         scope.resetApp();
       },
-      body: SingleChildScrollView(
+      body: WatchScrollbar(
         controller: scrollController,
-        child: SafeArea(
-          child: Text(context.strings.logout_dialog_message),
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: SafeArea(
+            child: Text(context.strings.logout_dialog_message),
+          ),
         ),
       ),
     );

@@ -32,7 +32,6 @@ dependencies:
   path: ^1.9.0
   path_provider: ^2.1.2
   riverpod_annotation: ^2.3.4
-  rotary_scrollbar: ^0.1.1
   sentry_flutter: ^7.16.1
   sentry_logging: ^7.16.1
   settings_annotation: ^1.0.1

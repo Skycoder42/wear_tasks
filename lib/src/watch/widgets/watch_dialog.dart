@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,7 @@ import 'side_button.dart';
 import 'watch_scaffold.dart';
 
 typedef ValueCallback<T> = T Function();
+typedef PageChangedCallback = void Function(int);
 
 class WatchDialog<T> extends HookWidget {
   static const animationDuration = Duration(milliseconds: 250);
@@ -17,6 +19,7 @@ class WatchDialog<T> extends HookWidget {
   final bool loadingOverlayActive;
   final ValueCallback<T?>? onReject;
   final ValueCallback<T> onAccept;
+  final PageChangedCallback? onPageChanged;
   final IndexedWidgetBuilder? bottomActionBuilder;
   final List<Widget> pages;
   final List<bool>? pageValidations;
@@ -34,7 +37,8 @@ class WatchDialog<T> extends HookWidget {
     required Widget body,
   })  : pages = [body],
         pageValidations = [canAccept],
-        bottomActionBuilder = _singleBottomActionBuilder(bottomAction);
+        bottomActionBuilder = _singleBottomActionBuilder(bottomAction),
+        onPageChanged = null;
 
   WatchDialog.paged({
     super.key,
@@ -42,6 +46,7 @@ class WatchDialog<T> extends HookWidget {
     this.loadingOverlayActive = false,
     required this.onAccept,
     this.onReject,
+    this.onPageChanged,
     this.bottomActionBuilder,
     required this.pages,
     this.pageValidations,
@@ -55,6 +60,16 @@ class WatchDialog<T> extends HookWidget {
   Widget build(BuildContext context) {
     final pageController = usePageController();
     final activePage = useState(0);
+
+    useEffect(
+      () {
+        if (onPageChanged case final PageChangedCallback cb) {
+          scheduleMicrotask(() => cb(activePage.value));
+        }
+        return null;
+      },
+      [onPageChanged, activePage.value],
+    );
 
     return PopScope(
       canPop: activePage.value == 0,
@@ -173,6 +188,12 @@ class WatchDialog<T> extends HookWidget {
         ObjectFlagProperty<IndexedWidgetBuilder?>.has(
           'bottomActionBuilder',
           bottomActionBuilder,
+        ),
+      )
+      ..add(
+        ObjectFlagProperty<PageChangedCallback?>.has(
+          'onPageChanged',
+          onPageChanged,
         ),
       );
   }
