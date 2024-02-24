@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../../background/workmanager.dart';
 import '../../common/localization/localization.dart';
+import '../../common/providers/sentry_provider_observer.dart';
 
 class WatchProviderScope extends StatefulWidget {
   final Widget child;
@@ -34,6 +36,9 @@ class WatchProviderScopeState extends State<WatchProviderScope> {
   @override
   Widget build(BuildContext context) => ProviderScope(
         key: _scopeKey,
+        observers: [
+          if (Sentry.isEnabled) const SentryProviderObserver(),
+        ],
         overrides: [
           if (_localizations != null)
             appLocalizationsProvider.overrideWith((_) => _localizations!)

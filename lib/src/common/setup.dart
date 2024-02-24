@@ -20,7 +20,6 @@ abstract base class Setup {
       return SentryFlutter.init(
         (options) => extraConfig(
           options
-            ..debug = kDebugMode
             ..attachThreads = true
             ..anrEnabled = true
             ..autoAppStart = false

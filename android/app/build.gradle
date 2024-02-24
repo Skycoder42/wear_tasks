@@ -57,17 +57,23 @@ android {
     }
 
     signingConfigs {
-        release {
-            keyAlias defaultConfig.applicationId
-            keyPassword keystoreProperties['password']
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['password']
+        if (keystorePropertiesFile.exists()) {
+            release {
+                keyAlias defaultConfig.applicationId
+                keyPassword keystoreProperties['password']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['password']
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig null
+            }
         }
     }
 }
