@@ -3,6 +3,11 @@ name: CI/CD for wear_tasks
 on:
   workflow_dispatch:
   push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
 
 jobs:
   ci:
@@ -124,7 +129,7 @@ jobs:
           --release_status completed
           --aab build/bundle/release/app-release.aab
           --mapping build/mapping/release/mapping.txt
-          --metadata_path build/metadata
+        # --metadata_path build/metadata
       - name: Upload debug symbols
         run: flutter pub run sentry_dart_plugin
         env:
