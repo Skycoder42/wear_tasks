@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../common/extensions/core_extensions.dart';
 import '../../../common/localization/localization.dart';
+import '../../../common/providers/package_info_provider.dart';
 import '../../app/router/watch_router.dart';
 import '../../models/task.dart';
 import '../../widgets/hooks/change_notifier_hook.dart';
@@ -103,6 +104,19 @@ class SettingsPage extends HookConsumerWidget {
               title: Text(context.strings.settings_page_logout),
               onTap: () async => const LogoutRoute().push(context),
             ),
+            if (ref.watch(packageInfoProvider)
+                case AsyncData(value: final packageInfo))
+              ListTile(
+                // TODO use app icon and make clean
+                leading: const Icon(Icons.watch),
+                title: Text(
+                  '${packageInfo.appName} ' '(${packageInfo.installerStore})',
+                ),
+                subtitle: Text(
+                  'Version: ${packageInfo.version} '
+                  '(${packageInfo.buildNumber})',
+                ),
+              ),
             // TODO add expressions configuration here?
             Offstage(
               child: CollectionSelectorButton(

@@ -17,7 +17,6 @@ class SentryProviderObserver extends ProviderObserver {
     Object? value,
     ProviderContainer container,
   ) {
-    _logUpdate('didAddProvider', provider);
     _maybeReportStateException(provider, value);
   }
 
@@ -28,16 +27,7 @@ class SentryProviderObserver extends ProviderObserver {
     Object? newValue,
     ProviderContainer container,
   ) {
-    _logUpdate('didUpdateProvider', provider);
     _maybeReportStateException(provider, newValue);
-  }
-
-  @override
-  void didDisposeProvider(
-    ProviderBase provider,
-    ProviderContainer container,
-  ) {
-    _logUpdate('didDisposeProvider', provider);
   }
 
   @override
@@ -47,14 +37,11 @@ class SentryProviderObserver extends ProviderObserver {
     StackTrace stackTrace,
     ProviderContainer container,
   ) {
-    _logUpdate('providerDidFail', provider);
     _reportException(provider, error, stackTrace);
   }
 
   void _maybeReportStateException(ProviderBase provider, Object? value) {
     switch (value) {
-      case AsyncError(error: final error, stackTrace: final stackTrace):
-        _reportException(provider, error, stackTrace);
       case ErrorState(error: final error, stackTrace: final stackTrace):
         _reportException(provider, error, stackTrace);
     }
@@ -95,14 +82,4 @@ class SentryProviderObserver extends ProviderObserver {
 
   List<String?>? _toList(Iterable<ProviderOrFamily>? providers) =>
       providers?.map((p) => p.name).toList();
-
-  void _logUpdate(String message, ProviderBase provider) => unawaited(
-        Sentry.addBreadcrumb(
-          Breadcrumb(
-            message: '$message($provider)',
-            type: 'providers',
-            category: 'providers',
-          ),
-        ),
-      );
 }

@@ -63,7 +63,7 @@ jobs:
         run: |
           set -eo pipefail
 
-          changelogs_dir=build/app/outputs/metadata/android/en-US/changelogs
+          changelogs_dir=build/app/outputs/metadata/en-US/changelogs
           mkdir -p "$changelogs_dir"
 
           dart run cider describe '${{ needs.cd.outputs.releaseVersion }}' > "$changelogs_dir/${{ steps.generateBuildNumber.outputs.buildNumber }}.txt"
@@ -129,7 +129,7 @@ jobs:
           --release_status completed
           --aab build/bundle/release/app-release.aab
           --mapping build/mapping/release/mapping.txt
-        # --metadata_path build/metadata
+          --metadata_path build/metadata
       - name: Upload debug symbols
         run: flutter pub run sentry_dart_plugin
         env:
