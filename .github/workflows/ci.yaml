@@ -54,6 +54,14 @@ jobs:
       - id: generateBuildNumber
         name: Generate build number
         run: dart run tool/generate_build_number.dart
+      - name: Generate Changelog
+        run: |
+          set -eo pipefail
+
+          changelogs_dir=build/app/outputs/metadata/android/en-US/changelogs
+          mkdir -p "$changelogs_dir"
+
+          dart run cider describe '${{ needs.cd.outputs.releaseVersion }}' > "$changelogs_dir/${{ steps.generateBuildNumber.outputs.buildNumber }}.txt"
       - name: Prepare signing keystore
         run: tool/prepare_keystore.sh create
         env:
@@ -105,14 +113,6 @@ jobs:
           path: build
       - name: Restore dart packages
         run: flutter pub get
-      - name: Prepare Changelog
-        run: |
-          set -exo pipefail
-
-          changelogs_dir=android/fastlane/metadata/android/en-US/changelogs
-          mkdir -p "$changelogs_dir"
-
-          dart run cider describe '${{ needs.cd.outputs.releaseVersion }}' > "$changelogs_dir/${{ needs.build.outputs.buildNumber }}.txt"
       - name: Prepare Google Play key
         run: echo '${{ secrets.GOOGLE_PLAY_KEY }}' > "$RUNNER_TEMP/fastlane-key-file.json"
       - name: Deploy to Google Play
@@ -120,16 +120,16 @@ jobs:
           fastlane upload_to_play_store
           --json_key "$RUNNER_TEMP/fastlane-key-file.json"
           --package_name de.skycoder42.wearTasks
-          --track wear:production
-          --release_status draft
-          --aab ../build/bundle/release/app-release.aab
-          --mapping ../build/mapping/release/mapping.txt
-        working-directory: android
+          --track wear:internal
+          --release_status completed
+          --aab build/bundle/release/app-release.aab
+          --mapping build/mapping/release/mapping.txt
+          --metadata_path build/metadata
       - name: Upload debug symbols
         run: flutter pub run sentry_dart_plugin
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_DIST: ${{ needs.build.outputs.buildNumber }}
+          SENTRY_DIST: ${{ needs.cd_build.outputs.buildNumber }}
       - name: Delete Google Play key
         if: always()
         run: rm -f "$RUNNER_TEMP/fastlane-key-file.json"

@@ -39,7 +39,7 @@ class ItemRepository with RepositoryMixin {
 
   @override
   @visibleForOverriding
-  final logger = Logger('$ItemRepository');
+  final logger = Logger('ItemRepository');
 
   ItemRepository(
     this.collectionUid,

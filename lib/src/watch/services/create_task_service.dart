@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../background/tasks/task_manager.dart';
+import '../../common/providers/sentry_provider_observer.dart';
 import '../models/task.dart';
 import '../repositories/item_repository.dart';
 import 'task_factory.dart';
@@ -16,7 +17,9 @@ class CreateTaskState with _$CreateTaskState {
   const factory CreateTaskState.ready() = CreateTaskReadyState;
   const factory CreateTaskState.saving() = CreateTaskSavingState;
   const factory CreateTaskState.saved(bool didUpload) = CreateTaskSavedState;
-  const factory CreateTaskState.failed(Object error) = CreateTaskFailedState;
+  @Implements<ErrorState>()
+  const factory CreateTaskState.failed(Object error, StackTrace stackTrace) =
+      CreateTaskFailedState;
 
   const CreateTaskState._();
 
@@ -28,7 +31,7 @@ class CreateTaskState with _$CreateTaskState {
 
 @riverpod
 class CreateTaskService extends _$CreateTaskService {
-  final _logger = Logger('$CreateTaskService');
+  final _logger = Logger('CreateTaskService');
 
   @override
   CreateTaskState build() => const CreateTaskState.ready();
@@ -59,7 +62,7 @@ class CreateTaskService extends _$CreateTaskService {
       // ignore: avoid_catches_without_on_clauses
     } catch (e, s) {
       _logger.severe('Failed to create task', e, s);
-      state = CreateTaskState.failed(e);
+      state = CreateTaskState.failed(e, s);
     }
   }
 }

@@ -12,7 +12,7 @@ part 'global_resolver.g.dart';
 GlobalResolver globalResolver(GlobalResolverRef ref) => GlobalResolver(ref);
 
 class GlobalResolver {
-  final _logger = Logger('$GlobalResolver');
+  final _logger = Logger('GlobalResolver');
 
   final GlobalResolverRef _ref;
 

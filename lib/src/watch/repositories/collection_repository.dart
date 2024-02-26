@@ -32,7 +32,7 @@ class CollectionRepository with RepositoryMixin {
 
   @override
   @visibleForOverriding
-  final logger = Logger('$CollectionRepository');
+  final logger = Logger('CollectionRepository');
 
   final _collections = <String, EtebaseCollection>{};
   final _responseRefs = <EtebaseCollectionListResponse>[];

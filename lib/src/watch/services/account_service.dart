@@ -25,7 +25,7 @@ Future<EtebaseAccount> etebaseAccount(EtebaseAccountRef ref) async {
 
 @Riverpod(keepAlive: true)
 class AccountService extends _$AccountService {
-  final _logger = Logger('$AccountService');
+  final _logger = Logger('AccountService');
 
   @override
   Future<EtebaseAccount?> build() async {
