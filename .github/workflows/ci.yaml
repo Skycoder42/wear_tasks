@@ -24,6 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      releaseCreated: ${{ steps.version.outputs.update }}
+      releaseVersion: ${{ steps.version.outputs.version }}
     steps:
       - name: Install Dart-SDK (stable)
         uses: dart-lang/setup-dart@v1
