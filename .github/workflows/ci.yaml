@@ -22,6 +22,8 @@ jobs:
     needs:
       - ci
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Install Dart-SDK (stable)
         uses: dart-lang/setup-dart@v1
